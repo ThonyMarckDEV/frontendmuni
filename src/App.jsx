@@ -83,7 +83,7 @@ function App() {
 
   return (
     <Router>
-      <div className="h-screen flex flex-col bg-gradient-to-b from-white to-blue-400 overflow-hidden">
+      <div className="h-screen flex flex-col bg-white overflow-hidden">
         {/* Navbar fijo en la parte superior */}
         {hasToken && <Navbar />}
         
