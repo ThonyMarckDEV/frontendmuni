@@ -6,16 +6,14 @@ import {
   AlertTriangle, 
   Bell, 
   Settings, 
-  Phone, 
-  HelpCircle, 
   LogOut,
   X,
   Menu
 } from 'lucide-react';
 
 const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false); // Internal state for sidebar visibility
-  const sidebarRef = useRef(null); // Reference to sidebar element
+  const [isOpen, setIsOpen] = useState(false);
+  const sidebarRef = useRef(null);
 
   const menuItems = [
     { icon: Home, label: 'Dashboard', active: false, path: '/admin' },
@@ -27,12 +25,9 @@ const Sidebar = () => {
   ];
 
   const bottomItems = [
-    { icon: Phone, label: 'Call Center', path: '/admin/call-center' },
-    { icon: HelpCircle, label: 'Help', path: '/admin/help' },
     { icon: LogOut, label: 'Log Out', path: '/logout' }
   ];
 
-  // Handle clicks outside sidebar to close it on mobile
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target)) {
@@ -48,7 +43,6 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Hamburger Button for Mobile */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="md:hidden fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition-colors duration-200"
@@ -56,7 +50,6 @@ const Sidebar = () => {
         <Menu size={24} />
       </button>
 
-      {/* Overlay for mobile */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
@@ -64,16 +57,15 @@ const Sidebar = () => {
         />
       )}
       
-      {/* Sidebar */}
       <div 
         ref={sidebarRef}
         className={`
-          fixed top-0 left-0 h-full w-64 bg-gray-800 text-white z-50 transform transition-transform duration-300 ease-in-out
+          fixed left-0 w-64 bg-gray-800 text-white z-50 transform transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
           md:translate-x-0 md:static md:z-auto
+          flex flex-col top-[4.5rem] h-[calc(100vh-4.5rem)]
         `}
       >
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-red-600 rounded flex items-center justify-center">
@@ -92,8 +84,7 @@ const Sidebar = () => {
           </button>
         </div>
 
-        {/* Menu Items */}
-        <nav className="flex-1 py-4">
+        <nav className="flex-1 py-4 overflow-y-auto">
           <ul className="space-y-1">
             {menuItems.map((item, index) => {
               const Icon = item.icon;
@@ -108,7 +99,7 @@ const Sidebar = () => {
                         : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                       }
                     `}
-                    onClick={() => setIsOpen(false)} // Close sidebar on mobile when clicking a menu item
+                    onClick={() => setIsOpen(false)}
                   >
                     <Icon size={18} className="mr-3" />
                     {item.label}
@@ -119,7 +110,6 @@ const Sidebar = () => {
           </ul>
         </nav>
 
-        {/* Bottom Items */}
         <div className="border-t border-gray-700 p-4">
           <ul className="space-y-1">
             {bottomItems.map((item, index) => {
@@ -129,7 +119,7 @@ const Sidebar = () => {
                   <a
                     href={item.path}
                     className="flex items-center px-2 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white rounded transition-colors duration-200"
-                    onClick={() => setIsOpen(false)} // Close sidebar on mobile when clicking a bottom item
+                    onClick={() => setIsOpen(false)}
                   >
                     <Icon size={16} className="mr-3" />
                     {item.label}

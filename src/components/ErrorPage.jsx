@@ -14,7 +14,7 @@ const ErrorPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-white">
+    <div className="min-h-screen flex flex-col bg-white text-white z-[99999]">
 
       {/* Contenido principal */}
       <div className="flex-grow flex justify-center items-center relative z-10">

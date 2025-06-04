@@ -19,9 +19,7 @@ import LoginUI from './ui/Home';
 
 // UIS ADMIN
 import HomeAdmin from './ui/Admin/Home/HomeAdmin';
-
-// UIS Cliente
-
+import RegistroUsuarios from './ui/Admin/Registro/RegistroUsuarios';
 
 // Utilities
 import ProtectedRouteHome from './utilities/ProtectedRouteHome';
@@ -36,11 +34,9 @@ function AppContent() {
       <Route path="/" element={<ProtectedRouteHome element={<HomeUI />} />} />
       <Route path="/login" element={<ProtectedRouteHome element={<LoginUI />} />} />
 
-      {/* Rutas Usuario */}
-
-
       {/* Rutas Admin */}
       <Route path="/admin" element={<ProtectedRouteAdmin element={<HomeAdmin />} />} />
+      <Route path="/admin/registro" element={<ProtectedRouteAdmin element={<RegistroUsuarios />} />} />
 
       {/* Ruta de error */}
       <Route path="/*" element={<ErrorPage />} />
@@ -74,17 +70,35 @@ function App() {
 
   return (
     <Router>
-      <div className="bg-white">
-        {hasToken && (
-          <>
-            <Navbar />
-            <Sidebar />
-          </>
-        )}
-        <div className={`flex-1 ${hasToken ? 'md:ml-64' : ''}`}>
-          <AppContent />
-          <ToastContainer position="top-right" autoClose={3000} />
+      <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+        {/* Navbar fijo en la parte superior */}
+        {hasToken && <Navbar />}
+        
+        {/* Container principal con sidebar y contenido */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Sidebar fijo a la izquierda */}
+          {hasToken && <Sidebar />}
+          
+          {/* Contenido principal con scroll interno */}
+          <main className="flex-1 overflow-y-auto">
+            <div className="p-6">
+              <AppContent />
+            </div>
+          </main>
         </div>
+        
+        {/* Toast notifications */}
+        <ToastContainer 
+          position="top-right" 
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
       </div>
     </Router>
   );
