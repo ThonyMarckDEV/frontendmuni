@@ -78,17 +78,24 @@ const UserManagement = () => {
   }, []);
 
   const handleSelectUser = (userId) => {
-    setSelectedUsers((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
-    );
+    const userIdStr = String(userId);
+    setSelectedUsers((prev) => {
+      const prevStr = prev.map((id) => String(id));
+      const isSelected = prevStr.includes(userIdStr);
+      return isSelected ? [] : [userId]; // Toggle selection: select if not selected, deselect if already selected
+    });
   };
 
   const filteredUsers = users.filter((user) => {
+    if (!user.idUsuario) {
+      console.warn('User with undefined idUsuario found:', user);
+      return false;
+    }
     const matchesSearch =
-      user.datos?.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.datos?.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.datos?.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.datos?.dni?.toLowerCase().includes(searchTerm.toLowerCase());
+      (user.datos?.nombre || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.datos?.apellido || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.datos?.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.datos?.dni || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = selectedRole ? user.idRol === parseInt(selectedRole) : true;
     return matchesSearch && matchesRole;
   });
@@ -115,12 +122,27 @@ const UserManagement = () => {
     setDetailsModalOpen(true);
   };
 
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setSelectedUsers([]); // Clear selection when closing
+  };
+
+  const closeDetailsModal = () => {
+    setDetailsModalOpen(false);
+    setSelectedUsers([]); // Clear selection when closing
+  };
+
   return (
     <div className="min-h-screen py-8 px-4 bg-gray-50">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+            />
           </svg>
           Gestión de Usuarios
         </h1>
@@ -141,7 +163,7 @@ const UserManagement = () => {
         />
         {selectedUsers.length === 1 && (
           <ActionBar
-            user={users.find((user) => user.id === selectedUsers[0])}
+            user={users.find((user) => user.idUsuario === selectedUsers[0])}
             openEditModal={openEditModal}
             openDetailsModal={openDetailsModal}
           />
@@ -185,7 +207,7 @@ const UserManagement = () => {
                 const payload = Object.fromEntries(
                   Object.entries(formData).filter(([_, value]) => value !== '' && value !== null)
                 );
-                const response = await fetchWithAuth(`${API_BASE_URL}/api/users/${currentUser.id}`, {
+                const response = await fetchWithAuth(`${API_BASE_URL}/api/users/${currentUser.idUsuario}`, {
                   method: 'PUT',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(payload),
@@ -195,13 +217,12 @@ const UserManagement = () => {
                   alert('Usuario actualizado exitosamente');
                   setUsers((prev) =>
                     prev.map((user) =>
-                      user.id === currentUser.id
+                      user.idUsuario === currentUser.idUsuario
                         ? { ...user, ...result.data, datos: { ...user.datos, ...result.data.datos } }
                         : user
                     )
                   );
-                  setEditModalOpen(false);
-                  setSelectedUsers([]);
+                  closeEditModal();
                 } else {
                   setErrors(result.errors || { general: result.message });
                   alert(`Error: ${result.message}`);
@@ -213,14 +234,14 @@ const UserManagement = () => {
                 setLoading(false);
               }
             }}
-            setEditModalOpen={setEditModalOpen}
+            setEditModalOpen={closeEditModal}
           />
         )}
         {detailsModalOpen && currentUser && (
           <UserDetailsModal
             user={currentUser}
             roles={roles}
-            setDetailsModalOpen={setDetailsModalOpen}
+            setDetailsModalOpen={closeDetailsModal}
           />
         )}
       </div>

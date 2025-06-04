@@ -7,9 +7,6 @@ const UserTable = ({ users, roles, loading, selectedUsers, handleSelectUser }) =
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Seleccionar
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Nombre
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -31,34 +28,35 @@ const UserTable = ({ users, roles, loading, selectedUsers, handleSelectUser }) =
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {loading ? (
-            <tr>
-              <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+            <tr key="loading-row">
+              <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
                 Cargando usuarios...
               </td>
             </tr>
           ) : users.length === 0 ? (
-            <tr>
-              <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+            <tr key="no-users-row">
+              <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
                 No se encontraron usuarios
               </td>
             </tr>
           ) : (
             users.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="checkbox"
-                    checked={selectedUsers.includes(user.id)}
-                    onChange={() => handleSelectUser(user.id)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                </td>
+              <tr
+                key={`user-row-${user.idUsuario}`}
+                className={`hover:bg-gray-50 cursor-pointer ${
+                  selectedUsers.includes(user.idUsuario) ? 'bg-blue-100' : ''
+                }`}
+                onClick={() => {
+                  console.log(`Row clicked for user ID: ${user.idUsuario}`);
+                  handleSelectUser(user.idUsuario);
+                }}
+              >
                 <td className="px-6 py-4 whitespace-nowrap">{user.datos?.nombre || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{user.datos?.apellido || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{user.datos?.dni || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{user.datos?.email || '-'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {roles.find((rol) => rol.id === user.idRol)?.nombre.toUpperCase() || '-'}
+                <td className="px-6 py-3 whitespace-nowrap">
+                  {roles.find((rol) => rol.idRol === user.idRol)?.nombre.toUpperCase() || '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
