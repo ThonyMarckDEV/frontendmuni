@@ -10,6 +10,15 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
     }
   };
 
+  const getPrioridadText = (prioridad) => {
+    switch (prioridad) {
+      case 0: return 'Baja';
+      case 1: return 'Media';
+      case 2: return 'Alta';
+      default: return '-';
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
@@ -25,6 +34,9 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
               Fecha de Reporte
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Prioridad
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Estado
             </th>
           </tr>
@@ -32,13 +44,13 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
         <tbody className="bg-white divide-y divide-gray-200">
           {loading ? (
             <tr key="loading-row">
-              <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
+              <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
                 Cargando incidentes...
               </td>
             </tr>
           ) : incidentes.length === 0 ? (
             <tr key="no-incidentes-row">
-              <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
+              <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
                 No se encontraron incidentes
               </td>
             </tr>
@@ -57,6 +69,19 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
                 <td className="px-6 py-4 whitespace-nowrap">{incidente.activo?.codigo_inventario || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{incidente.descripcion || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{incidente.fecha_reporte || '-'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span
+                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      incidente.prioridad === 2
+                        ? 'bg-red-100 text-red-800'
+                        : incidente.prioridad === 1
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-green-100 text-green-800'
+                    }`}
+                  >
+                    {getPrioridadText(incidente.prioridad)}
+                  </span>
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${

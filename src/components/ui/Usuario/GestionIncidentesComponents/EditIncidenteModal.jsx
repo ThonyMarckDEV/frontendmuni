@@ -89,6 +89,26 @@ const EditIncidenteModal = ({
                 />
                 {errors.descripcion && <p className="text-red-500 text-sm mt-1">{errors.descripcion}</p>}
               </div>
+              <div className="relative">
+                <select
+                  name="prioridad"
+                  value={formData.prioridad}
+                  onChange={handleInputChange}
+                  className={`w-full pl-4 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white ${
+                    errors.prioridad ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="0">Baja</option>
+                  <option value="1">Media</option>
+                  <option value="2">Alta</option>
+                </select>
+                <div className="absolute right-3 top-3 pointer-events-none">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                {errors.prioridad && <p className="text-red-500 text-sm mt-1">{errors.prioridad}</p>}
+              </div>
             </div>
             <div className="space-y-6">
               <h3 className="text-xl font-semibold text-gray-800 border-b-2 border-blue-200 pb-2">

@@ -19,6 +19,7 @@ const IncidenteManagement = () => {
     activo_id: '',
     descripcion: '',
     fecha_reporte: '',
+    prioridad: '0', // Default to Baja
   });
   const [errors, setErrors] = useState({});
 
@@ -82,6 +83,7 @@ const IncidenteManagement = () => {
       activo_id: incidente.activo_id || '',
       descripcion: incidente.descripcion || '',
       fecha_reporte: incidente.fecha_reporte || '',
+      prioridad: String(incidente.prioridad) || '0', // Ensure string for form
     });
     setEditModalOpen(true);
   };
@@ -137,6 +139,7 @@ const IncidenteManagement = () => {
                 if (!formData.activo_id) newErrors.activo_id = 'El activo es requerido';
                 if (!(formData.descripcion || '').trim()) newErrors.descripcion = 'La descripción es requerida';
                 if (!(formData.fecha_reporte || '').trim()) newErrors.fecha_reporte = 'La fecha de reporte es requerida';
+                if (!['0', '1', '2'].includes(formData.prioridad)) newErrors.prioridad = 'La prioridad es requerida';
                 setErrors(newErrors);
                 return Object.keys(newErrors).length === 0;
               };
@@ -147,7 +150,7 @@ const IncidenteManagement = () => {
                   activo_id: parseInt(formData.activo_id),
                   descripcion: formData.descripcion,
                   fecha_reporte: formData.fecha_reporte,
-                  // Do not include estado to preserve the existing value
+                  prioridad: parseInt(formData.prioridad), // Include prioridad
                 };
                 const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes/${currentIncidente.id}`, {
                   method: 'PUT',

@@ -11,7 +11,17 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
     }
   };
 
+  const getPrioridadText = (prioridad) => {
+    switch (prioridad) {
+      case 0: return 'Baja';
+      case 1: return 'Media';
+      case 2: return 'Alta';
+      default: return '-';
+    }
+  };
+
   const estadoText = getEstadoText(incidente.estado);
+  const prioridadText = getPrioridadText(incidente.prioridad);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -37,7 +47,21 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-medium">Descripción:</span>
-                {incidente.descripcion || '-'}
+                {incidente.descripcion || '-' }
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Prioridad:</span>
+                <span
+                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    prioridadText === 'Alta'
+                      ? 'bg-red-100 text-red-800'
+                      : prioridadText === 'Media'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-green-100 text-green-800'
+                  }`}
+                >
+                  {prioridadText}
+                </span>
               </div>
             </div>
             <div className="space-y-4">

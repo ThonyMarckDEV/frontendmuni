@@ -6,8 +6,10 @@ import { AlertTriangle, Calendar } from 'lucide-react';
 const IncidenteRegister = () => {
   const [formData, setFormData] = useState({
     activo_id: '',
+    titulo: '',
     descripcion: '',
-    fecha_reporte: new Date().toISOString().split('T')[0], // Current date as default
+    fecha_reporte: new Date().toISOString().split('T')[0],
+    prioridad: '0', // Default to Baja
   });
   const [activos, setActivos] = useState([]);
   const [errors, setErrors] = useState({});
@@ -61,6 +63,7 @@ const IncidenteRegister = () => {
       if (!formData.activo_id) newErrors.activo_id = 'El activo es requerido';
       if (!(formData.descripcion || '').trim()) newErrors.descripcion = 'La descripción es requerida';
       if (!(formData.fecha_reporte || '').trim()) newErrors.fecha_reporte = 'La fecha de reporte es requerida';
+      if (!['0', '1', '2'].includes(formData.prioridad)) newErrors.prioridad = 'La prioridad es requerida';
       setErrors(newErrors);
       return Object.keys(newErrors).length === 0;
     };
@@ -69,9 +72,11 @@ const IncidenteRegister = () => {
     try {
       const payload = {
         activo_id: parseInt(formData.activo_id),
+        titulo: formData.titulo || null,
         descripcion: formData.descripcion,
         fecha_reporte: formData.fecha_reporte,
-        estado: 0, // Always set to 0 (Pendiente)
+        prioridad: parseInt(formData.prioridad), // Include prioridad
+        estado: 0,
       };
       const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes`, {
         method: 'POST',
@@ -83,8 +88,10 @@ const IncidenteRegister = () => {
         alert('Incidente registrado exitosamente');
         setFormData({
           activo_id: '',
+          titulo: '',
           descripcion: '',
           fecha_reporte: new Date().toISOString().split('T')[0],
+          prioridad: '0',
         });
       } else {
         setErrors(result.errors || { general: result.message });
@@ -148,6 +155,19 @@ const IncidenteRegister = () => {
                 {errors.activo_id && <p className="text-red-500 text-sm mt-1">{errors.activo_id}</p>}
               </div>
               <div className="relative">
+                <input
+                  type="text"
+                  name="titulo"
+                  value={formData.titulo}
+                  onChange={handleInputChange}
+                  placeholder="Título del Incidente (Opcional)"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                    errors.titulo ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {errors.titulo && <p className="text-red-500 text-sm mt-1">{errors.titulo}</p>}
+              </div>
+              <div className="relative">
                 <textarea
                   name="descripcion"
                   value={formData.descripcion}
@@ -159,6 +179,26 @@ const IncidenteRegister = () => {
                   rows="4"
                 />
                 {errors.descripcion && <p className="text-red-500 text-sm mt-1">{errors.descripcion}</p>}
+              </div>
+              <div className="relative">
+                <select
+                  name="prioridad"
+                  value={formData.prioridad}
+                  onChange={handleInputChange}
+                  className={`w-full pl-4 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white ${
+                    errors.prioridad ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="0">Baja</option>
+                  <option value="1">Media</option>
+                  <option value="2">Alta</option>
+                </select>
+                <div className="absolute right-3 top-3 pointer-events-none">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                {errors.prioridad && <p className="text-red-500 text-sm mt-1">{errors.prioridad}</p>}
               </div>
             </div>
             <div className="space-y-6">
@@ -205,8 +245,10 @@ const IncidenteRegister = () => {
               onClick={() =>
                 setFormData({
                   activo_id: '',
+                  titulo: '',
                   descripcion: '',
                   fecha_reporte: new Date().toISOString().split('T')[0],
+                  prioridad: '0',
                 })
               }
               className="bg-gray-300 text-gray-800 font-bold py-4 px-12 rounded-lg shadow-lg hover:bg-gray-400"
