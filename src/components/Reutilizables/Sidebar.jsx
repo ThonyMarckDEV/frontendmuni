@@ -17,8 +17,8 @@ const Sidebar = () => {
 
   const menuItems = [
     { icon: Home, label: 'Dashboard', active: false, path: '/admin' },
-    { icon: FileText, label: 'Registro', active: false, path: '/admin/registro' },
-    { icon: Users, label: 'Usuarios', active: true, path: '/admin/usuarios' },
+    { icon: FileText, label: 'Registro', active: false, path: '/admin/registro-usuarios' },
+    { icon: Users, label: 'Usuarios', active: true, path: '/admin/gestion-usuarios' },
     { icon: AlertTriangle, label: 'Incidentes', active: false, path: '/admin/incidentes' },
     { icon: Bell, label: 'Notificaciones', active: false, path: '/admin/notificaciones' },
     { icon: Settings, label: 'Activos', active: false, path: '/admin/activos' }

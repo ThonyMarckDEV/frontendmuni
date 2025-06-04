@@ -20,6 +20,7 @@ import LoginUI from './ui/Home';
 // UIS ADMIN
 import HomeAdmin from './ui/Admin/Home/HomeAdmin';
 import RegistroUsuarios from './ui/Admin/Registro/RegistroUsuarios';
+import GestionUsuarios from './ui/Admin/GestionUsuarios/GestionUsuarios';
 
 // Utilities
 import ProtectedRouteHome from './utilities/ProtectedRouteHome';
@@ -36,7 +37,8 @@ function AppContent() {
 
       {/* Rutas Admin */}
       <Route path="/admin" element={<ProtectedRouteAdmin element={<HomeAdmin />} />} />
-      <Route path="/admin/registro" element={<ProtectedRouteAdmin element={<RegistroUsuarios />} />} />
+      <Route path="/admin/registro-usuarios" element={<ProtectedRouteAdmin element={<RegistroUsuarios />} />} />
+      <Route path="/admin/gestion-usuarios" element={<ProtectedRouteAdmin element={<GestionUsuarios />} />} />
 
       {/* Ruta de error */}
       <Route path="/*" element={<ErrorPage />} />
@@ -70,7 +72,7 @@ function App() {
 
   return (
     <Router>
-      <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+      <div className="h-screen flex flex-col bg-white overflow-hidden">
         {/* Navbar fijo en la parte superior */}
         {hasToken && <Navbar />}
         
