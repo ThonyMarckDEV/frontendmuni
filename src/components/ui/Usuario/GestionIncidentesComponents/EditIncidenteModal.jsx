@@ -107,24 +107,6 @@ const EditIncidenteModal = ({
                 />
                 {errors.fecha_reporte && <p className="text-red-500 text-sm mt-1">{errors.fecha_reporte}</p>}
               </div>
-              <div className="relative">
-                <select
-                  name="estado"
-                  value={formData.estado}
-                  onChange={handleInputChange}
-                  className="w-full pl-4 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white"
-                >
-                  <option value="0">Pendiente</option>
-                  <option value="1">En progreso</option>
-                  <option value="2">Resuelto</option>
-                </select>
-                <div className="absolute right-3 top-3 pointer-events-none">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                {errors.estado && <p className="text-red-500 text-sm mt-1">{errors.estado}</p>}
-              </div>
             </div>
           </div>
           {errors.general && (

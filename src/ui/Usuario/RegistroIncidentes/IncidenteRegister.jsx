@@ -8,7 +8,6 @@ const IncidenteRegister = () => {
     activo_id: '',
     descripcion: '',
     fecha_reporte: new Date().toISOString().split('T')[0], // Current date as default
-    estado: 0, // Default to 0 (Pendiente)
   });
   const [activos, setActivos] = useState([]);
   const [errors, setErrors] = useState({});
@@ -72,7 +71,7 @@ const IncidenteRegister = () => {
         activo_id: parseInt(formData.activo_id),
         descripcion: formData.descripcion,
         fecha_reporte: formData.fecha_reporte,
-        estado: parseInt(formData.estado), // Ensure estado is an integer
+        estado: 0, // Always set to 0 (Pendiente)
       };
       const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes`, {
         method: 'POST',
@@ -86,7 +85,6 @@ const IncidenteRegister = () => {
           activo_id: '',
           descripcion: '',
           fecha_reporte: new Date().toISOString().split('T')[0],
-          estado: 0,
         });
       } else {
         setErrors(result.errors || { general: result.message });
@@ -180,23 +178,6 @@ const IncidenteRegister = () => {
                 />
                 {errors.fecha_reporte && <p className="text-red-500 text-sm mt-1">{errors.fecha_reporte}</p>}
               </div>
-              <div className="relative">
-                <select
-                  name="estado"
-                  value={formData.estado}
-                  onChange={handleInputChange}
-                  className="w-full pl-4 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white"
-                >
-                  <option value="0">Pendiente</option>
-                  <option value="1">En progreso</option>
-                  <option value="2">Resuelto</option>
-                </select>
-                <div className="absolute right-3 top-3 pointer-events-none">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
             </div>
           </div>
           {errors.general && (
@@ -226,7 +207,6 @@ const IncidenteRegister = () => {
                   activo_id: '',
                   descripcion: '',
                   fecha_reporte: new Date().toISOString().split('T')[0],
-                  estado: 0,
                 })
               }
               className="bg-gray-300 text-gray-800 font-bold py-4 px-12 rounded-lg shadow-lg hover:bg-gray-400"

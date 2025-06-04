@@ -19,7 +19,6 @@ const IncidenteManagement = () => {
     activo_id: '',
     descripcion: '',
     fecha_reporte: '',
-    estado: 0,
   });
   const [errors, setErrors] = useState({});
 
@@ -47,7 +46,7 @@ const IncidenteManagement = () => {
     const fetchActivos = async () => {
       setLoadingActivos(true);
       try {
-        const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes/activos`, {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes/getactivos`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -83,7 +82,6 @@ const IncidenteManagement = () => {
       activo_id: incidente.activo_id || '',
       descripcion: incidente.descripcion || '',
       fecha_reporte: incidente.fecha_reporte || '',
-      estado: incidente.estado || 0,
     });
     setEditModalOpen(true);
   };
@@ -149,7 +147,7 @@ const IncidenteManagement = () => {
                   activo_id: parseInt(formData.activo_id),
                   descripcion: formData.descripcion,
                   fecha_reporte: formData.fecha_reporte,
-                  estado: parseInt(formData.estado),
+                  // Do not include estado to preserve the existing value
                 };
                 const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes/${currentIncidente.id}`, {
                   method: 'PUT',
