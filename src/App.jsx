@@ -26,6 +26,8 @@ import GestionActivos from './ui/Admin/GestionActivos/ActivoManagement';
 
 // UIS USUARIOS
 import HomeUsuario from './ui/Usuario/Home/HomeUsuario';
+import RegistroIncidentes from './ui/Usuario/RegistroIncidentes/IncidenteRegister';
+import GestionIncidentes from './ui/Usuario/GestionIncidentes/IncidenteManagement';
 
 // Utilities
 import ProtectedRouteHome from './utilities/ProtectedRouteHome';
@@ -49,7 +51,8 @@ function AppContent() {
 
       {/* Rutas Usuario */}
       <Route path="/usuario" element={<ProtectedRouteUsuario element={<HomeUsuario />} />} />
-
+      <Route path="/usuario/registro-incidentes" element={<ProtectedRouteUsuario element={<RegistroIncidentes />} />} />
+      <Route path="/usuario/gestion-uincidentes" element={<ProtectedRouteUsuario element={<GestionIncidentes />} />} />
 
       {/* Ruta de error */}
       <Route path="/*" element={<ErrorPage />} />

@@ -11,25 +11,24 @@ import {
   Menu,
   ChevronDown,
   ChevronRight,
-  Wrench // Added for tecnico role
+  Wrench
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import { logout } from '../../js/logout'; // Import the logout function
+import { logout } from '../../js/logout';
 import jwtUtils from '../../utilities/jwtUtils';
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isUsersDropdownOpen, setIsUsersDropdownOpen] = useState(false);
   const [isActivosDropdownOpen, setIsActivosDropdownOpen] = useState(false);
+  const [isIncidentesDropdownOpen, setIsIncidentesDropdownOpen] = useState(false);
+  const [isManualToggle, setIsManualToggle] = useState(false); // Track manual toggle
   const sidebarRef = useRef(null);
   const location = useLocation();
 
   const token = jwtUtils.getRefreshTokenFromCookie();
+  const userRole = jwtUtils.getUserRole(token) || 'usuario';
 
-  // Retrieve user role from localStorage (adjust based on your setup)
-  const userRole = jwtUtils.getUserRole(token) || 'usuario'; // Default to 'usuario' if no role is found
-
-  // Define menu items based on role
   const getMenuItems = () => {
     switch (userRole) {
       case 'admin':
@@ -62,7 +61,14 @@ const Sidebar = () => {
       default:
         return [
           { icon: Home, label: 'Dashboard', path: '/usuario' },
-          { icon: AlertTriangle, label: 'Incidentes', path: '/usuario/incidentes' },
+          {
+            icon: AlertTriangle,
+            label: 'Incidentes',
+            subItems: [
+              { label: 'Incidentes', path: '/usuario/registro-indicentes' },
+              { label: 'Gestión', path: '/usuario/gestion-incidentes' }
+            ]
+          },
         ];
     }
   };
@@ -73,15 +79,13 @@ const Sidebar = () => {
     { icon: LogOut, label: 'Log Out', action: 'logout' }
   ];
 
-  // Logout function
   const handleLogout = async () => {
     try {
-      await logout(); // Call the imported logout function
+      await logout();
     } catch (error) {
       console.error('Error in handleLogout:', error);
-      // The logout function already handles redirection and token removal
     } finally {
-      setIsOpen(false); // Close the sidebar
+      setIsOpen(false);
     }
   };
 
@@ -99,16 +103,40 @@ const Sidebar = () => {
   }, [isOpen]);
 
   useEffect(() => {
-    const isUsersSubItemActive = menuItems
-      .find(item => item.label === 'Gestión y Usuarios')
-      ?.subItems?.some(subItem => location.pathname === subItem.path);
-    setIsUsersDropdownOpen(isUsersSubItemActive || false);
+    // Only update dropdown states on initial mount or route change if not manually toggled
+    if (!isManualToggle) {
+      const isUsersSubItemActive = menuItems
+        .find(item => item.label === 'Gestión y Usuarios')
+        ?.subItems?.some(subItem => location.pathname === subItem.path);
+      setIsUsersDropdownOpen(isUsersSubItemActive || false);
 
-    const isActivosSubItemActive = menuItems
-      .find(item => item.label === 'Activos')
-      ?.subItems?.some(subItem => location.pathname === subItem.path);
-    setIsActivosDropdownOpen(isActivosSubItemActive || false);
-  }, [location.pathname, menuItems]);
+      const isActivosSubItemActive = menuItems
+        .find(item => item.label === 'Activos')
+        ?.subItems?.some(subItem => location.pathname === subItem.path);
+      setIsActivosDropdownOpen(isActivosSubItemActive || false);
+
+      const isIncidentesSubItemActive = menuItems
+        .find(item => item.label === 'Incidentes')
+        ?.subItems?.some(subItem => location.pathname === subItem.path);
+      setIsIncidentesDropdownOpen(isIncidentesSubItemActive || false);
+    }
+  }, [location.pathname, menuItems, isManualToggle]);
+
+  const handleDropdownToggle = (label) => {
+    setIsManualToggle(true); // Mark as manual toggle
+    if (label === 'Gestión y Usuarios') {
+      setIsUsersDropdownOpen(prev => !prev);
+    } else if (label === 'Activos') {
+      setIsActivosDropdownOpen(prev => !prev);
+    } else if (label === 'Incidentes') {
+      setIsIncidentesDropdownOpen(prev => !prev);
+    }
+  };
+
+  const handleSubItemClick = () => {
+    setIsOpen(false); // Close sidebar on mobile
+    setIsManualToggle(false); // Reset manual toggle after selecting a sub-item
+  };
 
   return (
     <>
@@ -166,13 +194,7 @@ const Sidebar = () => {
                   {item.subItems ? (
                     <>
                       <button
-                        onClick={() => {
-                          if (item.label === 'Gestión y Usuarios') {
-                            setIsUsersDropdownOpen(!isUsersDropdownOpen);
-                          } else if (item.label === 'Activos') {
-                            setIsActivosDropdownOpen(!isActivosDropdownOpen);
-                          }
-                        }}
+                        onClick={() => handleDropdownToggle(item.label)}
                         className={`
                           flex items-center w-full px-4 py-3 text-sm transition-colors duration-200 text-left
                           ${isActive 
@@ -184,14 +206,16 @@ const Sidebar = () => {
                         <Icon size={18} className="mr-3" />
                         {item.label}
                         {(item.label === 'Gestión y Usuarios' && isUsersDropdownOpen) || 
-                         (item.label === 'Activos' && isActivosDropdownOpen) ? (
+                         (item.label === 'Activos' && isActivosDropdownOpen) || 
+                         (item.label === 'Incidentes' && isIncidentesDropdownOpen) ? (
                           <ChevronDown size={18} className="ml-auto" />
                         ) : (
                           <ChevronRight size={18} className="ml-auto" />
                         )}
                       </button>
                       {(item.label === 'Gestión y Usuarios' && isUsersDropdownOpen) || 
-                       (item.label === 'Activos' && isActivosDropdownOpen) ? (
+                       (item.label === 'Activos' && isActivosDropdownOpen) || 
+                       (item.label === 'Incidentes' && isIncidentesDropdownOpen) ? (
                         <ul className="ml-6 space-y-1">
                           {item.subItems.map((subItem, subIndex) => (
                             <li key={subIndex}>
@@ -204,7 +228,7 @@ const Sidebar = () => {
                                     : 'text-gray-400 hover:bg-gray-700 hover:text-white'
                                   }
                                 `}
-                                onClick={() => setIsOpen(false)}
+                                onClick={handleSubItemClick}
                               >
                                 {subItem.label}
                               </a>
