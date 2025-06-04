@@ -19,7 +19,7 @@ import LoginUI from './ui/Home';
 
 // UIS ADMIN
 import HomeAdmin from './ui/Admin/Home/HomeAdmin';
-import RegistroUsuarios from './ui/Admin/Registro/RegistroUsuarios';
+import RegistroUsuarios from './ui/Admin/RegistroUsuarios/RegistroUsuarios';
 import GestionUsuarios from './ui/Admin/GestionUsuarios/GestionUsuarios';
 import RegistroActivos from './ui/Admin/RegistroActivos/ActivoRegister';
 import GestionActivos from './ui/Admin/GestionActivos/ActivoManagement';

@@ -26,6 +26,15 @@ const EditIncidenteModal = ({
     }
   };
 
+  // Formatear fecha_reporte para el input de tipo date
+  const formatDateForInput = (date) => {
+    try {
+      return new Date(date).toISOString().split('T')[0]; // Formato: yyyy-MM-dd
+    } catch {
+      return '';
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -119,7 +128,7 @@ const EditIncidenteModal = ({
                 <input
                   type="date"
                   name="fecha_reporte"
-                  value={formData.fecha_reporte}
+                  value={formatDateForInput(formData.fecha_reporte)}
                   onChange={handleInputChange}
                   className={`w-full pl-11 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                     errors.fecha_reporte ? 'border-red-500' : 'border-gray-300'

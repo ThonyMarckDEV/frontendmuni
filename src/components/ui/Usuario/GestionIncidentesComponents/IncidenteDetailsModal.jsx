@@ -1,6 +1,8 @@
 import React from 'react';
 import { X, AlertTriangle, Calendar, Download } from 'lucide-react';
-import { fetchWithAuth } from '../../../../js/authToken'; // Assuming this is your auth fetch utility
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { fetchWithAuth } from '../../../../js/authToken';
 import API_BASE_URL from '../../../../js/urlHelper';
 
 const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
@@ -19,6 +21,14 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
       case 1: return 'Media';
       case 2: return 'Alta';
       default: return '-';
+    }
+  };
+
+  const formatDate = (date) => {
+    try {
+      return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: es });
+    } catch {
+      return '-';
     }
   };
 
@@ -101,7 +111,7 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
               <div className="flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-gray-400" />
                 <span className="font-medium">Fecha de Reporte:</span>
-                {incidente.fecha_reporte || '-'}
+                {formatDate(incidente.fecha_reporte)}
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-medium">Estado:</span>

@@ -1,4 +1,6 @@
 import React from 'react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectIncidente }) => {
   const getEstadoText = (estado) => {
@@ -16,6 +18,14 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
       case 1: return 'Media';
       case 2: return 'Alta';
       default: return '-';
+    }
+  };
+
+  const formatDate = (date) => {
+    try {
+      return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: es });
+    } catch {
+      return '-';
     }
   };
 
@@ -68,7 +78,7 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
               >
                 <td className="px-6 py-4 whitespace-nowrap">{incidente.activo?.codigo_inventario || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{incidente.descripcion || '-'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{incidente.fecha_reporte || '-'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatDate(incidente.fecha_reporte)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
