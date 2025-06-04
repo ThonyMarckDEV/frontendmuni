@@ -52,7 +52,7 @@ function AppContent() {
       {/* Rutas Usuario */}
       <Route path="/usuario" element={<ProtectedRouteUsuario element={<HomeUsuario />} />} />
       <Route path="/usuario/registro-incidentes" element={<ProtectedRouteUsuario element={<RegistroIncidentes />} />} />
-      <Route path="/usuario/gestion-uincidentes" element={<ProtectedRouteUsuario element={<GestionIncidentes />} />} />
+      <Route path="/usuario/gestion-incidentes" element={<ProtectedRouteUsuario element={<GestionIncidentes />} />} />
 
       {/* Ruta de error */}
       <Route path="/*" element={<ErrorPage />} />

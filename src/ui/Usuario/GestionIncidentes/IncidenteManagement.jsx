@@ -19,7 +19,7 @@ const IncidenteManagement = () => {
     activo_id: '',
     descripcion: '',
     fecha_reporte: '',
-    estado: 'Pendiente',
+    estado: 0,
   });
   const [errors, setErrors] = useState({});
 
@@ -83,7 +83,7 @@ const IncidenteManagement = () => {
       activo_id: incidente.activo_id || '',
       descripcion: incidente.descripcion || '',
       fecha_reporte: incidente.fecha_reporte || '',
-      estado: incidente.estado || 'Pendiente',
+      estado: incidente.estado || 0,
     });
     setEditModalOpen(true);
   };
@@ -145,9 +145,12 @@ const IncidenteManagement = () => {
               if (!validateForm()) return;
               setLoading(true);
               try {
-                const payload = Object.fromEntries(
-                  Object.entries(formData).filter(([_, value]) => value !== '' && value !== null)
-                );
+                const payload = {
+                  activo_id: parseInt(formData.activo_id),
+                  descripcion: formData.descripcion,
+                  fecha_reporte: formData.fecha_reporte,
+                  estado: parseInt(formData.estado),
+                };
                 const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes/${currentIncidente.id}`, {
                   method: 'PUT',
                   headers: { 'Content-Type': 'application/json' },

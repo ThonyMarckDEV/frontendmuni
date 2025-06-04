@@ -8,7 +8,7 @@ const IncidenteRegister = () => {
     activo_id: '',
     descripcion: '',
     fecha_reporte: new Date().toISOString().split('T')[0], // Current date as default
-    estado: 'Pendiente',
+    estado: 0, // Default to 0 (Pendiente)
   });
   const [activos, setActivos] = useState([]);
   const [errors, setErrors] = useState({});
@@ -19,7 +19,7 @@ const IncidenteRegister = () => {
     const fetchActivos = async () => {
       setLoadingActivos(true);
       try {
-        const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes/activos`, {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes/getactivos`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -28,9 +28,11 @@ const IncidenteRegister = () => {
           setActivos(result.data);
         } else {
           console.error('Error fetching activos:', result.message);
+          setErrors((prev) => ({ ...prev, general: result.message }));
         }
       } catch (error) {
         console.error('Error fetching activos:', error);
+        setErrors((prev) => ({ ...prev, general: 'Error al cargar los activos' }));
       } finally {
         setLoadingActivos(false);
       }
@@ -66,9 +68,12 @@ const IncidenteRegister = () => {
     if (!validateForm()) return;
     setLoading(true);
     try {
-      const payload = Object.fromEntries(
-        Object.entries(formData).filter(([_, value]) => value !== '' && value !== null)
-      );
+      const payload = {
+        activo_id: parseInt(formData.activo_id),
+        descripcion: formData.descripcion,
+        fecha_reporte: formData.fecha_reporte,
+        estado: parseInt(formData.estado), // Ensure estado is an integer
+      };
       const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -81,7 +86,7 @@ const IncidenteRegister = () => {
           activo_id: '',
           descripcion: '',
           fecha_reporte: new Date().toISOString().split('T')[0],
-          estado: 'Pendiente',
+          estado: 0,
         });
       } else {
         setErrors(result.errors || { general: result.message });
@@ -113,14 +118,18 @@ const IncidenteRegister = () => {
                   name="activo_id"
                   value={formData.activo_id}
                   onChange={handleInputChange}
-                  disabled={loadingActivos}
+                  disabled={loadingActivos || activos.length === 0}
                   className={`w-full pl-4 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white ${
                     errors.activo_id ? 'border-red-500' : 'border-gray-300'
-                  } ${loadingActivos ? 'cursor-not-allowed opacity-50' : ''}`}
+                  } ${loadingActivos || activos.length === 0 ? 'cursor-not-allowed opacity-50' : ''}`}
                 >
                   {loadingActivos ? (
                     <option value="" disabled>
                       CARGANDO ACTIVOS...
+                    </option>
+                  ) : activos.length === 0 ? (
+                    <option value="" disabled>
+                      NO HAY ACTIVOS DISPONIBLES
                     </option>
                   ) : (
                     <>
@@ -178,9 +187,9 @@ const IncidenteRegister = () => {
                   onChange={handleInputChange}
                   className="w-full pl-4 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white"
                 >
-                  <option value="Pendiente">PENDIENTE</option>
-                  <option value="En Proceso">EN PROCESO</option>
-                  <option value="Resuelto">RESUELTO</option>
+                  <option value="0">Pendiente</option>
+                  <option value="1">En progreso</option>
+                  <option value="2">Resuelto</option>
                 </select>
                 <div className="absolute right-3 top-3 pointer-events-none">
                   <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,8 +205,10 @@ const IncidenteRegister = () => {
           <div className="mt-8 flex justify-center gap-4">
             <button
               type="submit"
-              disabled={loading}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-12 rounded-lg shadow-lg transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading || activos.length === 0}
+              className={`bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-12 rounded-lg shadow-lg transform transition-all duration-200 hover:scale-105 ${
+                loading || activos.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               {loading ? (
                 <div className="flex items-center gap-2">
@@ -215,7 +226,7 @@ const IncidenteRegister = () => {
                   activo_id: '',
                   descripcion: '',
                   fecha_reporte: new Date().toISOString().split('T')[0],
-                  estado: 'Pendiente',
+                  estado: 0,
                 })
               }
               className="bg-gray-300 text-gray-800 font-bold py-4 px-12 rounded-lg shadow-lg hover:bg-gray-400"

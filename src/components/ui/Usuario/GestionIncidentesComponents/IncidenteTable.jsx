@@ -1,6 +1,15 @@
 import React from 'react';
 
 const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectIncidente }) => {
+  const getEstadoText = (estado) => {
+    switch (estado) {
+      case 0: return 'Pendiente';
+      case 1: return 'En progreso';
+      case 2: return 'Resuelto';
+      default: return '-';
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
@@ -51,14 +60,14 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      incidente.estado === 'Resuelto'
+                      incidente.estado === 2
                         ? 'bg-green-100 text-green-800'
-                        : incidente.estado === 'En Proceso'
+                        : incidente.estado === 1
                         ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-red-100 text-red-800'
                     }`}
                   >
-                    {incidente.estado || '-'}
+                    {getEstadoText(incidente.estado)}
                   </span>
                 </td>
               </tr>

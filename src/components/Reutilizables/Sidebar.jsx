@@ -65,7 +65,7 @@ const Sidebar = () => {
             icon: AlertTriangle,
             label: 'Incidentes',
             subItems: [
-              { label: 'Incidentes', path: '/usuario/registro-indicentes' },
+              { label: 'Incidentes', path: '/usuario/registro-incidentes' },
               { label: 'Gestión', path: '/usuario/gestion-incidentes' }
             ]
           },

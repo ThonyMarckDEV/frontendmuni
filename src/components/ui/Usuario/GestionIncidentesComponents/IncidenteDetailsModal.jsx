@@ -2,6 +2,17 @@ import React from 'react';
 import { X, AlertTriangle, Calendar } from 'lucide-react';
 
 const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
+  const getEstadoText = (estado) => {
+    switch (estado) {
+      case 0: return 'Pendiente';
+      case 1: return 'En progreso';
+      case 2: return 'Resuelto';
+      default: return '-';
+    }
+  };
+
+  const estadoText = getEstadoText(incidente.estado);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -42,14 +53,14 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
                 <span className="font-medium">Estado:</span>
                 <span
                   className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    incidente.estado === 'Resuelto'
+                    estadoText === 'Resuelto'
                       ? 'bg-green-100 text-green-800'
-                      : incidente.estado === 'En Proceso'
+                      : estadoText === 'En progreso'
                       ? 'bg-yellow-100 text-yellow-800'
                       : 'bg-red-100 text-red-800'
                   }`}
                 >
-                  {incidente.estado || '-'}
+                  {estadoText}
                 </span>
               </div>
             </div>

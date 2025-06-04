@@ -50,7 +50,7 @@ const EditIncidenteModal = ({
                   value={formData.activo_id}
                   onChange={handleInputChange}
                   disabled={loadingActivos}
-                  className={`w-full pl-4 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white ${
+                  className={`w-full pl-4 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                     errors.activo_id ? 'border-red-500' : 'border-gray-300'
                   } ${loadingActivos ? 'cursor-not-allowed opacity-50' : ''}`}
                 >
@@ -114,9 +114,9 @@ const EditIncidenteModal = ({
                   onChange={handleInputChange}
                   className="w-full pl-4 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white"
                 >
-                  <option value="Pendiente">PENDIENTE</option>
-                  <option value="En Proceso">EN PROCESO</option>
-                  <option value="Resuelto">RESUELTO</option>
+                  <option value="0">Pendiente</option>
+                  <option value="1">En progreso</option>
+                  <option value="2">Resuelto</option>
                 </select>
                 <div className="absolute right-3 top-3 pointer-events-none">
                   <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
