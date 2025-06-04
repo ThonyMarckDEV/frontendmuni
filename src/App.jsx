@@ -22,6 +22,9 @@ import HomeAdmin from './ui/Admin/Home/HomeAdmin';
 import RegistroUsuarios from './ui/Admin/Registro/RegistroUsuarios';
 import GestionUsuarios from './ui/Admin/GestionUsuarios/GestionUsuarios';
 
+import RegistroActivos from './ui/Admin/RegistroActivos/ActivoRegister';
+import GestionActivos from './ui/Admin/GestionActivos/ActivoManagement';
+
 // Utilities
 import ProtectedRouteHome from './utilities/ProtectedRouteHome';
 import ProtectedRouteUsuario from './utilities/ProtectedRouteUsuario';
@@ -39,6 +42,9 @@ function AppContent() {
       <Route path="/admin" element={<ProtectedRouteAdmin element={<HomeAdmin />} />} />
       <Route path="/admin/registro-usuarios" element={<ProtectedRouteAdmin element={<RegistroUsuarios />} />} />
       <Route path="/admin/gestion-usuarios" element={<ProtectedRouteAdmin element={<GestionUsuarios />} />} />
+      <Route path="/admin/registro-activos" element={<ProtectedRouteAdmin element={<RegistroActivos />} />} />
+      <Route path="/admin/gestion-activos" element={<ProtectedRouteAdmin element={<GestionActivos />} />} />
+
 
       {/* Ruta de error */}
       <Route path="/*" element={<ErrorPage />} />

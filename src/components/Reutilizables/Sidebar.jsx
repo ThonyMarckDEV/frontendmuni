@@ -17,6 +17,7 @@ import { useLocation } from 'react-router-dom';
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isUsersDropdownOpen, setIsUsersDropdownOpen] = useState(false);
+  const [isActivosDropdownOpen, setIsActivosDropdownOpen] = useState(false);
   const sidebarRef = useRef(null);
   const location = useLocation();
 
@@ -26,13 +27,21 @@ const Sidebar = () => {
       icon: Users,
       label: 'Gestión y Usuarios',
       subItems: [
-        { label: 'Registro', path: '/admin/registro-usuarios' },
-        { label: 'Usuarios', path: '/admin/gestion-usuarios' }
+        { label: 'Usuarios', path: '/admin/registro-usuarios' },
+        { label: 'Gestión', path: '/admin/gestion-usuarios' }
       ]
     },
+    { icon: FileText, label: 'Registro', path: '/admin/registro-usuarios' },
     { icon: AlertTriangle, label: 'Incidentes', path: '/admin/incidentes' },
     { icon: Bell, label: 'Notificaciones', path: '/admin/notificaciones' },
-    { icon: Settings, label: 'Activos', path: '/admin/activos' }
+    {
+      icon: Settings,
+      label: 'Activos',
+      subItems: [
+        { label: 'Activos', path: '/admin/registro-activos' },
+        { label: 'Gestión de Activos', path: '/admin/gestion-activos' },
+      ]
+    }
   ];
 
   const bottomItems = [
@@ -52,12 +61,16 @@ const Sidebar = () => {
     };
   }, [isOpen]);
 
-  // Automatically open the dropdown if a sub-item is active
   useEffect(() => {
-    const isSubItemActive = menuItems
-      .find(item => item.subItems)
+    const isUsersSubItemActive = menuItems
+      .find(item => item.label === 'Gestión y Usuarios')
       ?.subItems.some(subItem => location.pathname === subItem.path);
-    setIsUsersDropdownOpen(isSubItemActive);
+    setIsUsersDropdownOpen(isUsersSubItemActive);
+
+    const isActivosSubItemActive = menuItems
+      .find(item => item.label === 'Activos')
+      ?.subItems.some(subItem => location.pathname === subItem.path);
+    setIsActivosDropdownOpen(isActivosSubItemActive);
   }, [location.pathname]);
 
   return (
@@ -116,7 +129,13 @@ const Sidebar = () => {
                   {item.subItems ? (
                     <>
                       <button
-                        onClick={() => setIsUsersDropdownOpen(!isUsersDropdownOpen)}
+                        onClick={() => {
+                          if (item.label === 'Gestión y Usuarios') {
+                            setIsUsersDropdownOpen(!isUsersDropdownOpen);
+                          } else if (item.label === 'Activos') {
+                            setIsActivosDropdownOpen(!isActivosDropdownOpen);
+                          }
+                        }}
                         className={`
                           flex items-center w-full px-4 py-3 text-sm transition-colors duration-200 text-left
                           ${isActive 
@@ -127,13 +146,15 @@ const Sidebar = () => {
                       >
                         <Icon size={18} className="mr-3" />
                         {item.label}
-                        {isUsersDropdownOpen ? (
+                        {(item.label === 'Gestión y Usuarios' && isUsersDropdownOpen) || 
+                         (item.label === 'Activos' && isActivosDropdownOpen) ? (
                           <ChevronDown size={18} className="ml-auto" />
                         ) : (
                           <ChevronRight size={18} className="ml-auto" />
                         )}
                       </button>
-                      {isUsersDropdownOpen && (
+                      {(item.label === 'Gestión y Usuarios' && isUsersDropdownOpen) || 
+                       (item.label === 'Activos' && isActivosDropdownOpen) ? (
                         <ul className="ml-6 space-y-1">
                           {item.subItems.map((subItem, subIndex) => (
                             <li key={subIndex}>
@@ -153,7 +174,7 @@ const Sidebar = () => {
                             </li>
                           ))}
                         </ul>
-                      )}
+                      ) : null}
                     </>
                   ) : (
                     <a
