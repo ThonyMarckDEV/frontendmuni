@@ -3,8 +3,8 @@ import React from 'react';
 const HomeAdmin = () => {
 
   return (
-    <div className="min-h-screen bg-white">
-       UI ADMIN
+    <div className="p-6">
+     Home ADMIN UI
     </div>
   );
 };

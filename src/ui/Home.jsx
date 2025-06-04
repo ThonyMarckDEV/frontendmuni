@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import API_BASE_URL from '../js/urlHelper';
 import jwtUtils from '../utilities/jwtUtils';
 import FetchWithGif from '../components/Reutilizables/FetchWithGif';

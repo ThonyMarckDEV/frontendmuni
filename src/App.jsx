@@ -21,12 +21,13 @@ import LoginUI from './ui/Home';
 import HomeAdmin from './ui/Admin/Home/HomeAdmin';
 
 // UIS Cliente
-import ConfigUI from './ui/Cliente/ConfigUI/Config';
+
 
 // Utilities
 import ProtectedRouteHome from './utilities/ProtectedRouteHome';
-import ProtectedRouteCliente from './utilities/ProtectedRouteCliente';
+import ProtectedRouteUsuario from './utilities/ProtectedRouteUsuario';
 import ProtectedRouteAdmin from './utilities/ProtectedRouteAdmin';
+import ProtectedRouteTecnico from './utilities/ProtectedRouteTecnico';
 
 function AppContent() {
   return (
@@ -35,8 +36,8 @@ function AppContent() {
       <Route path="/" element={<ProtectedRouteHome element={<HomeUI />} />} />
       <Route path="/login" element={<ProtectedRouteHome element={<LoginUI />} />} />
 
-      {/* Rutas Cliente */}
-      <Route path="/settings" element={<ProtectedRouteCliente element={<ConfigUI />} />} />
+      {/* Rutas Usuario */}
+
 
       {/* Rutas Admin */}
       <Route path="/admin" element={<ProtectedRouteAdmin element={<HomeAdmin />} />} />

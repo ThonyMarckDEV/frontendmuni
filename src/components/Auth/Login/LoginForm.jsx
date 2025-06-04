@@ -2,21 +2,7 @@ import React, { useState } from 'react';
 import { User, Lock, LogIn } from 'lucide-react';
 import img from '../../../img/logo/munipiuralogo.png';
 
-const LoginForm = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const handleLogin = () => {
-    setLoading(true);
-    // Simulación de login
-    setTimeout(() => {
-      setLoading(false);
-      alert('Inicio de sesión exitoso!');
-    }, 2000);
-  };
-
+const LoginForm = ({ email, setEmail, password, setPassword, handleLogin, handleGoogleLogin, loading, rememberMe, setRememberMe}) => {
   return (
     <div className="flex bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full">
       {/* Panel Izquierdo - Bienvenida */}
