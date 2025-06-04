@@ -75,7 +75,7 @@ const Login = () => {
   };
 
   return (
-      <div className="min-h-screen w-full overflow-auto bg-gradient-to-b from-white to-blue-400 flex items-center justify-center relative py-6">
+      <div className="min-h-screen w-full overflow-auto  flex items-center justify-center relative py-6">
         {loading && <FetchWithGif />}
         <LoginForm 
           email={email}

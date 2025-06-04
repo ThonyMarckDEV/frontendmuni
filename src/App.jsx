@@ -21,9 +21,11 @@ import LoginUI from './ui/Home';
 import HomeAdmin from './ui/Admin/Home/HomeAdmin';
 import RegistroUsuarios from './ui/Admin/Registro/RegistroUsuarios';
 import GestionUsuarios from './ui/Admin/GestionUsuarios/GestionUsuarios';
-
 import RegistroActivos from './ui/Admin/RegistroActivos/ActivoRegister';
 import GestionActivos from './ui/Admin/GestionActivos/ActivoManagement';
+
+// UIS USUARIOS
+import HomeUsuario from './ui/Usuario/Home/HomeUsuario';
 
 // Utilities
 import ProtectedRouteHome from './utilities/ProtectedRouteHome';
@@ -44,6 +46,9 @@ function AppContent() {
       <Route path="/admin/gestion-usuarios" element={<ProtectedRouteAdmin element={<GestionUsuarios />} />} />
       <Route path="/admin/registro-activos" element={<ProtectedRouteAdmin element={<RegistroActivos />} />} />
       <Route path="/admin/gestion-activos" element={<ProtectedRouteAdmin element={<GestionActivos />} />} />
+
+      {/* Rutas Usuario */}
+      <Route path="/usuario" element={<ProtectedRouteUsuario element={<HomeUsuario />} />} />
 
 
       {/* Ruta de error */}
@@ -78,7 +83,7 @@ function App() {
 
   return (
     <Router>
-      <div className="h-screen flex flex-col bg-white overflow-hidden">
+      <div className="h-screen flex flex-col bg-gradient-to-b from-white to-blue-400 overflow-hidden">
         {/* Navbar fijo en la parte superior */}
         {hasToken && <Navbar />}
         
@@ -88,7 +93,7 @@ function App() {
           {hasToken && <Sidebar />}
           
           {/* Contenido principal con scroll interno */}
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1">
             <div className="p-6">
               <AppContent />
             </div>

@@ -10,10 +10,12 @@ import {
   X, 
   Menu,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Wrench // Added for tecnico role
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { logout } from '../../js/logout'; // Import the logout function
+import jwtUtils from '../../utilities/jwtUtils';
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,26 +24,50 @@ const Sidebar = () => {
   const sidebarRef = useRef(null);
   const location = useLocation();
 
-  const menuItems = [
-    { icon: Home, label: 'Dashboard', path: '/admin' },
-    {
-      icon: Users,
-      label: 'Gestión y Usuarios',
-      subItems: [
-        { label: 'Usuarios', path: '/admin/registro-usuarios' },
-        { label: 'Gestión', path: '/admin/gestion-usuarios' }
-      ]
-    },
-    {
-      icon: Settings,
-      label: 'Activos',
-      subItems: [
-        { label: 'Activos', path: '/admin/registro-activos' },
-        { label: 'Gestión de Activos', path: '/admin/gestion-activos' },
-      ]
-    },
-    { icon: AlertTriangle, label: 'Incidentes', path: '/admin/incidentes' },
-  ];
+  const token = jwtUtils.getRefreshTokenFromCookie();
+
+  // Retrieve user role from localStorage (adjust based on your setup)
+  const userRole = jwtUtils.getUserRole(token) || 'usuario'; // Default to 'usuario' if no role is found
+
+  // Define menu items based on role
+  const getMenuItems = () => {
+    switch (userRole) {
+      case 'admin':
+        return [
+          { icon: Home, label: 'Dashboard', path: '/admin' },
+          {
+            icon: Users,
+            label: 'Gestión y Usuarios',
+            subItems: [
+              { label: 'Usuarios', path: '/admin/registro-usuarios' },
+              { label: 'Gestión', path: '/admin/gestion-usuarios' }
+            ]
+          },
+          {
+            icon: Settings,
+            label: 'Activos',
+            subItems: [
+              { label: 'Activos', path: '/admin/registro-activos' },
+              { label: 'Gestión de Activos', path: '/admin/gestion-activos' },
+            ]
+          },
+          { icon: AlertTriangle, label: 'Incidentes', path: '/admin/incidentes' },
+        ];
+      case 'tecnico':
+        return [
+          { icon: AlertTriangle, label: 'Incidentes', path: '/tecnico/incidentes' },
+          { icon: Wrench, label: 'Mantenimiento', path: '/tecnico/mantenimiento' },
+        ];
+      case 'usuario':
+      default:
+        return [
+          { icon: Home, label: 'Dashboard', path: '/usuario' },
+          { icon: AlertTriangle, label: 'Incidentes', path: '/usuario/incidentes' },
+        ];
+    }
+  };
+
+  const menuItems = getMenuItems();
 
   const bottomItems = [
     { icon: LogOut, label: 'Log Out', action: 'logout' }
@@ -75,14 +101,14 @@ const Sidebar = () => {
   useEffect(() => {
     const isUsersSubItemActive = menuItems
       .find(item => item.label === 'Gestión y Usuarios')
-      ?.subItems.some(subItem => location.pathname === subItem.path);
-    setIsUsersDropdownOpen(isUsersSubItemActive);
+      ?.subItems?.some(subItem => location.pathname === subItem.path);
+    setIsUsersDropdownOpen(isUsersSubItemActive || false);
 
     const isActivosSubItemActive = menuItems
       .find(item => item.label === 'Activos')
-      ?.subItems.some(subItem => location.pathname === subItem.path);
-    setIsActivosDropdownOpen(isActivosSubItemActive);
-  }, [location.pathname]);
+      ?.subItems?.some(subItem => location.pathname === subItem.path);
+    setIsActivosDropdownOpen(isActivosSubItemActive || false);
+  }, [location.pathname, menuItems]);
 
   return (
     <>
