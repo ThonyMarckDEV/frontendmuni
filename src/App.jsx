@@ -77,8 +77,8 @@ function App() {
       <div className="bg-white">
         {hasToken && (
           <>
-            <Sidebar />
             <Navbar />
+            <Sidebar />
           </>
         )}
         <div className={`flex-1 ${hasToken ? 'md:ml-64' : ''}`}>

@@ -27,6 +27,10 @@ export const getUserID = (token) => jwtDecode(token)?.sub ?? null;
 // Función para obtener el id carrito del usuario
 export const getIdCarrito = (token) => jwtDecode(token)?.idCarrito ?? null;
 
+export const getNombres = (token) => jwtDecode(token)?.nombre ?? null;
+
+export const getApellidos = (token) => jwtDecode(token)?.apellido ?? null;
+
 // Función para obtener el google_user del usuario
 export const getGoogle_User = (token) => jwtDecode(token)?.google_user ?? null;
 
@@ -151,5 +155,7 @@ export default {
   getRefreshTokenIDFromCookie,
   getIdCarrito,
   getGoogle_User,
-  getEmail_Verified
+  getEmail_Verified,
+  getNombres,
+  getApellidos
 };

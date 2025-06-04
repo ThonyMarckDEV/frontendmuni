@@ -1,7 +1,15 @@
 import React from 'react';
 import { Menu } from 'lucide-react';
+import jwtUtils from '../../utilities/jwtUtils';
 
-const Navbar = ({ onMenuClick, isAdmin = false, userName = "Usuario", userRole = "Administrador" }) => {
+const Navbar = () => {
+  const token = jwtUtils.getRefreshTokenFromCookie();
+  const userName = jwtUtils.getNombres(token) || "Usuario";
+  const userRole = jwtUtils.getUserRole(token) || "Administrador";
+  const isAdmin = userRole.toLowerCase() === 'admin';
+
+  // roles disponibles = admin, usuario, tecnico
+
   return (
     <div className="bg-blue-600 text-white px-4 py-3 shadow-lg sticky top-0 z-30">
       <div className="flex items-center justify-between">
@@ -9,7 +17,7 @@ const Navbar = ({ onMenuClick, isAdmin = false, userName = "Usuario", userRole =
           {/* Botón hamburguesa solo visible en móvil para admin */}
           {isAdmin && (
             <button 
-              onClick={onMenuClick}
+              onClick={() => {/* Add menu click handler logic here */}}
               className="md:hidden text-white hover:bg-blue-700 p-2 rounded transition-colors duration-200"
             >
               <Menu size={20} />
