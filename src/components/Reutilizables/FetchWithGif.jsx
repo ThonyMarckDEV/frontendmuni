@@ -3,7 +3,7 @@ import loadingGif from '../../img/utilities/loading.gif';
 
 const FetchWithGif = () => {
   return (
-    <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-white flex items-center justify-center z-[9999]">
       <img
         src={loadingGif}
         alt="Loading..."
