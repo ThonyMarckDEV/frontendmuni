@@ -28,13 +28,6 @@ export async function logout() {
         body: JSON.stringify({ idToken }),
       });
 
-      // Procesar la respuesta
-     // const data = await response.json();
-      // if (response.ok && data.message === 'OK') {
-      //   console.log('Sesión eliminada exitosamente');
-      // } else {
-      //   console.warn('Error en la respuesta del backend:', data.message);
-      // }
     } else {
       console.warn('No se encontró idToken, omitiendo llamada al backend');
     }

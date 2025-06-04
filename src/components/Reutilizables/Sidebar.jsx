@@ -13,6 +13,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { logout } from '../../js/logout'; // Import the logout function
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,9 +32,6 @@ const Sidebar = () => {
         { label: 'Gestión', path: '/admin/gestion-usuarios' }
       ]
     },
-    { icon: FileText, label: 'Registro', path: '/admin/registro-usuarios' },
-    { icon: AlertTriangle, label: 'Incidentes', path: '/admin/incidentes' },
-    { icon: Bell, label: 'Notificaciones', path: '/admin/notificaciones' },
     {
       icon: Settings,
       label: 'Activos',
@@ -41,12 +39,25 @@ const Sidebar = () => {
         { label: 'Activos', path: '/admin/registro-activos' },
         { label: 'Gestión de Activos', path: '/admin/gestion-activos' },
       ]
-    }
+    },
+    { icon: AlertTriangle, label: 'Incidentes', path: '/admin/incidentes' },
   ];
 
   const bottomItems = [
-    { icon: LogOut, label: 'Log Out', path: '/logout' }
+    { icon: LogOut, label: 'Log Out', action: 'logout' }
   ];
+
+  // Logout function
+  const handleLogout = async () => {
+    try {
+      await logout(); // Call the imported logout function
+    } catch (error) {
+      console.error('Error in handleLogout:', error);
+      // The logout function already handles redirection and token removal
+    } finally {
+      setIsOpen(false); // Close the sidebar
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -204,14 +215,24 @@ const Sidebar = () => {
               const Icon = item.icon;
               return (
                 <li key={index}>
-                  <a
-                    href={item.path}
-                    className="flex items-center px-2 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white rounded transition-colors duration-200"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Icon size={16} className="mr-3" />
-                    {item.label}
-                  </a>
+                  {item.action === 'logout' ? (
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full px-2 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white rounded transition-colors duration-200 text-left"
+                    >
+                      <Icon size={16} className="mr-3" />
+                      {item.label}
+                    </button>
+                  ) : (
+                    <a
+                      href={item.path}
+                      className="flex items-center px-2 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white rounded transition-colors duration-200"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Icon size={16} className="mr-3" />
+                      {item.label}
+                    </a>
+                  )}
                 </li>
               );
             })}
