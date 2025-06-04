@@ -6,22 +6,33 @@ import {
   AlertTriangle, 
   Bell, 
   Settings, 
-  LogOut,
-  X,
-  Menu
+  LogOut, 
+  X, 
+  Menu,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isUsersDropdownOpen, setIsUsersDropdownOpen] = useState(false);
   const sidebarRef = useRef(null);
+  const location = useLocation();
 
   const menuItems = [
-    { icon: Home, label: 'Dashboard', active: false, path: '/admin' },
-    { icon: FileText, label: 'Registro', active: false, path: '/admin/registro-usuarios' },
-    { icon: Users, label: 'Usuarios', active: true, path: '/admin/gestion-usuarios' },
-    { icon: AlertTriangle, label: 'Incidentes', active: false, path: '/admin/incidentes' },
-    { icon: Bell, label: 'Notificaciones', active: false, path: '/admin/notificaciones' },
-    { icon: Settings, label: 'Activos', active: false, path: '/admin/activos' }
+    { icon: Home, label: 'Dashboard', path: '/admin' },
+    {
+      icon: Users,
+      label: 'Gestión y Usuarios',
+      subItems: [
+        { label: 'Registro', path: '/admin/registro-usuarios' },
+        { label: 'Usuarios', path: '/admin/gestion-usuarios' }
+      ]
+    },
+    { icon: AlertTriangle, label: 'Incidentes', path: '/admin/incidentes' },
+    { icon: Bell, label: 'Notificaciones', path: '/admin/notificaciones' },
+    { icon: Settings, label: 'Activos', path: '/admin/activos' }
   ];
 
   const bottomItems = [
@@ -40,6 +51,14 @@ const Sidebar = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen]);
+
+  // Automatically open the dropdown if a sub-item is active
+  useEffect(() => {
+    const isSubItemActive = menuItems
+      .find(item => item.subItems)
+      ?.subItems.some(subItem => location.pathname === subItem.path);
+    setIsUsersDropdownOpen(isSubItemActive);
+  }, [location.pathname]);
 
   return (
     <>
@@ -88,22 +107,70 @@ const Sidebar = () => {
           <ul className="space-y-1">
             {menuItems.map((item, index) => {
               const Icon = item.icon;
+              const isActive = item.subItems
+                ? item.subItems.some(subItem => location.pathname === subItem.path)
+                : location.pathname === item.path;
+
               return (
                 <li key={index}>
-                  <a
-                    href={item.path}
-                    className={`
-                      flex items-center px-4 py-3 text-sm transition-colors duration-200
-                      ${item.active 
-                        ? 'bg-blue-600 text-white border-r-2 border-blue-400' 
-                        : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                      }
-                    `}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Icon size={18} className="mr-3" />
-                    {item.label}
-                  </a>
+                  {item.subItems ? (
+                    <>
+                      <button
+                        onClick={() => setIsUsersDropdownOpen(!isUsersDropdownOpen)}
+                        className={`
+                          flex items-center w-full px-4 py-3 text-sm transition-colors duration-200 text-left
+                          ${isActive 
+                            ? 'bg-blue-600 text-white border-r-2 border-blue-400' 
+                            : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                          }
+                        `}
+                      >
+                        <Icon size={18} className="mr-3" />
+                        {item.label}
+                        {isUsersDropdownOpen ? (
+                          <ChevronDown size={18} className="ml-auto" />
+                        ) : (
+                          <ChevronRight size={18} className="ml-auto" />
+                        )}
+                      </button>
+                      {isUsersDropdownOpen && (
+                        <ul className="ml-6 space-y-1">
+                          {item.subItems.map((subItem, subIndex) => (
+                            <li key={subIndex}>
+                              <a
+                                href={subItem.path}
+                                className={`
+                                  flex items-center px-4 py-2 text-sm transition-colors duration-200
+                                  ${location.pathname === subItem.path
+                                    ? 'bg-blue-600 text-white border-r-2 border-blue-400'
+                                    : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                                  }
+                                `}
+                                onClick={() => setIsOpen(false)}
+                              >
+                                {subItem.label}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  ) : (
+                    <a
+                      href={item.path}
+                      className={`
+                        flex items-center px-4 py-3 text-sm transition-colors duration-200
+                        ${isActive 
+                          ? 'bg-blue-600 text-white border-r-2 border-blue-400' 
+                          : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                        }
+                      `}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Icon size={18} className="mr-3" />
+                      {item.label}
+                    </a>
+                  )}
                 </li>
               );
             })}
