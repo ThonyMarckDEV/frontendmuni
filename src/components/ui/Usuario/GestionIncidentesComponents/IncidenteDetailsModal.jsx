@@ -1,5 +1,7 @@
 import React from 'react';
-import { X, AlertTriangle, Calendar } from 'lucide-react';
+import { X, AlertTriangle, Calendar, Download } from 'lucide-react';
+import { fetchWithAuth } from '../../../../js/authToken'; // Assuming this is your auth fetch utility
+import API_BASE_URL from '../../../../js/urlHelper';
 
 const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
   const getEstadoText = (estado) => {
@@ -22,6 +24,34 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
 
   const estadoText = getEstadoText(incidente.estado);
   const prioridadText = getPrioridadText(incidente.prioridad);
+
+  const handleDownloadPdf = async () => {
+    try {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes/${incidente.id}/pdf`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/pdf',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al generar el PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `incidente_${incidente.id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      alert('Error al descargar el PDF');
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -47,7 +77,7 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-medium">Descripción:</span>
-                {incidente.descripcion || '-' }
+                {incidente.descripcion || '-'}
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-medium">Prioridad:</span>
@@ -89,7 +119,14 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
               </div>
             </div>
           </div>
-          <div className="mt-8 flex justify-center">
+          <div className="mt-8 flex justify-center gap-4">
+            <button
+              onClick={handleDownloadPdf}
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-12 rounded-lg shadow-lg transform transition-all duration-200 hover:scale-105 flex items-center gap-2"
+            >
+              <Download className="w-5 h-5" />
+              DESCARGAR PDF
+            </button>
             <button
               onClick={() => setDetailsModalOpen(false)}
               className="bg-gray-300 text-gray-800 font-bold py-4 px-12 rounded-lg shadow-lg hover:bg-gray-400"
