@@ -105,7 +105,7 @@ function App() {
           {hasToken && <Sidebar />}
           
           {/* Contenido principal con scroll interno */}
-          <main className="flex-1">
+          <main className="flex-1 overflow-y-auto">
             <div className="p-6">
               <AppContent />
             </div>
