@@ -38,7 +38,7 @@ const ErrorPage = () => {
           <div className="animate-in opacity-0 transform translate-y-8 transition-all duration-700 ease-out">
             <a
               href="/"
-              className="inline-block px-8 py-4 bg-bue-600 text-white text-lg font-semibold rounded-lg  transition-all duration-300 transform hover:scale-105"
+              className="inline-block px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg  transition-all duration-300 transform hover:scale-105"
             >
               Volver al inicio
             </a>
