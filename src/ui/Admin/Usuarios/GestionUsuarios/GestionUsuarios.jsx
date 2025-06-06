@@ -10,11 +10,13 @@ import UserDetailsModal from '../../../../components/ui/Admin/GestionUsuariosCom
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [areas, setAreas] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingRoles, setLoadingRoles] = useState(true);
+  const [loadingAreas, setLoadingAreas] = useState(true);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -28,7 +30,7 @@ const UserManagement = () => {
     idRol: '',
     estado: 0,
     especializacion: '',
-    area: '',
+    idArea: '',
   });
   const [errors, setErrors] = useState({});
 
@@ -53,6 +55,26 @@ const UserManagement = () => {
       }
     };
 
+    const fetchAreas = async () => {
+      setLoadingAreas(true);
+      try {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/areas`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const result = await response.json();
+        if (result.success) {
+          setAreas(result.data);
+        } else {
+          console.error('Error fetching areas:', result.message);
+        }
+      } catch (error) {
+        console.error('Error fetching areas:', error);
+      } finally {
+        setLoadingAreas(false);
+      }
+    };
+
     const fetchUsers = async () => {
       setLoading(true);
       try {
@@ -74,6 +96,7 @@ const UserManagement = () => {
     };
 
     fetchRoles();
+    fetchAreas();
     fetchUsers();
   }, []);
 
@@ -82,7 +105,7 @@ const UserManagement = () => {
     setSelectedUsers((prev) => {
       const prevStr = prev.map((id) => String(id));
       const isSelected = prevStr.includes(userIdStr);
-      return isSelected ? [] : [userId]; // Toggle selection: select if not selected, deselect if already selected
+      return isSelected ? [] : [userId];
     });
   };
 
@@ -112,7 +135,7 @@ const UserManagement = () => {
       idRol: user.idRol || '',
       estado: user.estado || 0,
       especializacion: user.datos?.especializacion || '',
-      area: user.datos?.area || '',
+      idArea: user.datos?.idArea || '',
     });
     setEditModalOpen(true);
   };
@@ -124,12 +147,12 @@ const UserManagement = () => {
 
   const closeEditModal = () => {
     setEditModalOpen(false);
-    setSelectedUsers([]); // Clear selection when closing
+    setSelectedUsers([]);
   };
 
   const closeDetailsModal = () => {
     setDetailsModalOpen(false);
-    setSelectedUsers([]); // Clear selection when closing
+    setSelectedUsers([]);
   };
 
   return (
@@ -175,8 +198,10 @@ const UserManagement = () => {
             errors={errors}
             setErrors={setErrors}
             roles={roles}
+            areas={areas}
             loading={loading}
             loadingRoles={loadingRoles}
+            loadingAreas={loadingAreas}
             handleEditSubmit={async (e) => {
               e.preventDefault();
               const validateForm = () => {
@@ -193,10 +218,10 @@ const UserManagement = () => {
                   newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
                 }
                 if (formData.idRol === 3 && !(formData.especializacion || '').trim()) {
-                  newErrors.especializacion = 'La especialización es requerida para técnicos';
+                  newErrors.especializacion = 'La especialización es requerida para titulares';
                 }
-                if (formData.idRol === 2 && !(formData.area || '').trim()) {
-                  newErrors.area = 'El área es requerida para usuarios';
+                if (formData.idRol === 2 && !formData.idArea) {
+                  newErrors.idArea = 'El área es requerida para usuarios';
                 }
                 setErrors(newErrors);
                 return Object.keys(newErrors).length === 0;
@@ -241,6 +266,7 @@ const UserManagement = () => {
           <UserDetailsModal
             user={currentUser}
             roles={roles}
+            areas={areas}
             setDetailsModalOpen={closeDetailsModal}
           />
         )}

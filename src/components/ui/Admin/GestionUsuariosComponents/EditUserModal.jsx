@@ -7,8 +7,10 @@ const EditUserModal = ({
   errors,
   setErrors,
   roles,
+  areas,
   loading,
   loadingRoles,
+  loadingAreas,
   handleEditSubmit,
   setEditModalOpen,
 }) => {
@@ -31,6 +33,7 @@ const EditUserModal = ({
     setFormData((prev) => ({
       ...prev,
       idRol: selectedRoleId,
+      idArea: selectedRoleId === 2 ? prev.idArea : '',
     }));
   };
 
@@ -62,7 +65,7 @@ const EditUserModal = ({
                   value={formData.nombre}
                   onChange={handleInputChange}
                   placeholder="Nombre"
-                  className={`w-full pl-11 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  className={`w-full pl-11 pr-4 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                     errors.nombre ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
@@ -75,21 +78,21 @@ const EditUserModal = ({
                   value={formData.apellido}
                   onChange={handleInputChange}
                   placeholder="Apellidos"
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  className={`w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                     errors.apellido ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
                 {errors.apellido && <p className="text-red-500 text-sm mt-1">{errors.apellido}</p>}
               </div>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-3 top-2 w-5 h-6 text-gray-400" />
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  placeholder="Correo Institucional"
-                  className={`w-full pl-11 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  placeholder="Correo Electrónico"
+                  className={`w-full pl-11 pr-4 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                     errors.email ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
@@ -103,7 +106,7 @@ const EditUserModal = ({
                   value={formData.dni}
                   onChange={handleInputChange}
                   placeholder="DNI"
-                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full pl-11 pr-4 py-3 border rounded-md border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
                 {errors.dni && <p className="text-red-500 text-sm mt-1">{errors.dni}</p>}
               </div>
@@ -115,7 +118,7 @@ const EditUserModal = ({
                   value={formData.telefono}
                   onChange={handleInputChange}
                   placeholder="Teléfono"
-                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full pl-11 pr-4 py-3 border rounded-md border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
                 {errors.telefono && <p className="text-red-500 text-sm mt-1">{errors.telefono}</p>}
               </div>
@@ -125,14 +128,14 @@ const EditUserModal = ({
                 DATOS DE USUARIO
               </h3>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-3 top-3 w-3 h-5 text-gray-600" />
                 <input
                   type="password"
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="Nueva Contraseña (opcional)"
-                  className={`w-full pl-11 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  className={`w-full pl-11 pr-4 py-3 border rounded-md rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                     errors.password ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
@@ -145,20 +148,20 @@ const EditUserModal = ({
                   value={formData.idRol}
                   onChange={handleRoleChange}
                   disabled={loadingRoles}
-                  className={`w-full pl-11 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white ${
+                  className={`w-full pl-11 pr-4 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all rounded-lg appearance-none bg-white ${
                     errors.idRol ? 'border-red-500' : 'border-gray-300'
                   } ${loadingRoles ? 'cursor-not-allowed opacity-50' : ''}`}
                 >
                   {loadingRoles ? (
-                    <option value="" disabled>
+                    <option value="0" disabled>
                       CARGANDO...
                     </option>
                   ) : (
                     <>
-                      <option value="">SELECCIONE ROL</option>
-                      {roles.map((rol) => (
-                        <option key={rol.id} value={rol.id}>
-                          {rol.nombre.toUpperCase()}
+                      <option value="0">SELECCIONE EL ROL</option>
+                      {roles.map((role, index) => (
+                        <option key={index} value={role.id}>
+                          {role.nombre.toUpperCase()}
                         </option>
                       ))}
                     </>
@@ -176,10 +179,10 @@ const EditUserModal = ({
                   name="estado"
                   value={formData.estado}
                   onChange={handleInputChange}
-                  className="w-full pl-4 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white"
+                  className="w-full pl-4 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all rounded-lg appearance-none bg-white"
                 >
-                  <option value={1}>ACTIVO</option>
-                  <option value={0}>INACTIVO</option>
+                  <option value={0}>ACTIVABLE</option>
+                  <option value={1}>ACTIVADO</option>
                 </select>
                 <div className="absolute right-3 top-3 pointer-events-none">
                   <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,7 +201,7 @@ const EditUserModal = ({
                         value={formData.especializacion}
                         onChange={handleInputChange}
                         placeholder="Especialización"
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                        className={`w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all rounded-lg ${
                           errors.especializacion ? 'border-red-500' : 'border-gray-300'
                         }`}
                       />
@@ -208,32 +211,56 @@ const EditUserModal = ({
                     </div>
                   )}
                   {formData.idRol === 2 && (
-                    <div>
-                      <input
-                        type="text"
-                        name="area"
-                        value={formData.area}
+                    <div className="relative">
+                      <Building className="absolute left-3 top-3 w-5 h-5 text-gray-400 z-10" />
+                      <select
+                        name="idArea"
+                        value={formData.idArea}
                         onChange={handleInputChange}
-                        placeholder="Área"
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
-                          errors.area ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                      />
-                      {errors.area && <p className="text-red-500 text-sm mt-1">{errors.area}</p>}
+                        disabled={loadingAreas}
+                        className={`w-full pl-11 pr-4 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all rounded-lg appearance-none bg-white ${
+                          errors.idArea ? 'border-red-500' : 'border-gray-300'
+                        } ${loadingAreas ? 'cursor-not-allowed opacity-50' : ''}`}
+                      >
+                        {loadingAreas ? (
+                          <option value="0" disabled>
+                            CARGANDO ÁREAS...
+                          </option>
+                        ) : areas.length === 0 ? (
+                          <option value="0" disabled>
+                            NO HAY ÁREAS DISPONIBLES
+                          </option>
+                        ) : (
+                          <>
+                            <option value="0">SELECCIONE ÁREA</option>
+                            {areas.map((area, index) => (
+                              <option key={area.id || index} value={area.idArea}>
+                                {area.nombre.toUpperCase()}
+                              </option>
+                            ))}
+                          </>
+                        )}
+                      </select>
+                      <div className="absolute right-3 top-3 pointer-events-none">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                      {errors.idArea && <p className="text-red-500 text-sm mt-1">{errors.idArea}</p>}
                     </div>
                   )}
                 </div>
               )}
             </div>
           </div>
-          {errors.general && (
-            <div className="mt-4 text-red-500 text-center">{errors.general}</div>
+          {errors.error && (
+            <div className="mt-4 text-red-500 text-center">{errors.error}</div>
           )}
           <div className="mt-8 flex justify-center gap-4">
             <button
               type="submit"
               disabled={loading}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-12 rounded-lg shadow-lg transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:bg-blue-800 hover:to-blue-900 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <div className="flex items-center gap-2">
@@ -247,7 +274,7 @@ const EditUserModal = ({
             <button
               type="button"
               onClick={() => setEditModalOpen(false)}
-              className="bg-gray-300 text-gray-800 font-bold py-4 px-12 rounded-lg shadow-lg hover:bg-gray-400"
+              className="bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded hover:bg-gray-400"
             >
               CANCELAR
             </button>

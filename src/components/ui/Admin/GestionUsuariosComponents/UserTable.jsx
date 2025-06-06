@@ -55,8 +55,8 @@ const UserTable = ({ users, roles, loading, selectedUsers, handleSelectUser }) =
                 <td className="px-6 py-4 whitespace-nowrap">{user.datos?.apellido || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{user.datos?.dni || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{user.datos?.email || '-'}</td>
-                <td className="px-6 py-3 whitespace-nowrap">
-                  {roles.find((rol) => rol.idRol === user.idRol)?.nombre.toUpperCase() || '-'}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {user.rol?.nombre ? user.rol.nombre.toUpperCase() : '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span

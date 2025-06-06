@@ -14,20 +14,22 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
     idRol: '',
     estado: 0,
     especializacion: '',
-    area: '',
+    idArea: '',
   });
 
   const [roles, setRoles] = useState([]);
+  const [areas, setAreas] = useState([]);
   const [isUsuario, setIsUsuario] = useState(false); // ID 2
   const [isTecnico, setIsTecnico] = useState(false); // ID 3
   const [loading, setLoading] = useState(false);
-  const [loadingRoles, setLoadingRoles] = useState(true); // New state for role loading
+  const [loadingRoles, setLoadingRoles] = useState(true);
+  const [loadingAreas, setLoadingAreas] = useState(true);
   const [errors, setErrors] = useState({});
   const [isUpdating, setIsUpdating] = useState(!!userId);
 
   useEffect(() => {
     const fetchRoles = async () => {
-      setLoadingRoles(true); // Start loading
+      setLoadingRoles(true);
       try {
         const response = await fetchWithAuth(`${API_BASE_URL}/api/roles`, {
           method: 'GET',
@@ -42,11 +44,32 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
       } catch (error) {
         console.error('Error fetching roles:', error);
       } finally {
-        setLoadingRoles(false); // End loading
+        setLoadingRoles(false);
+      }
+    };
+
+    const fetchAreas = async () => {
+      setLoadingAreas(true);
+      try {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/areas`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const result = await response.json();
+        if (result.success) {
+          setAreas(result.data);
+        } else {
+          console.error('Error fetching areas:', result.message);
+        }
+      } catch (error) {
+        console.error('Error fetching areas:', error);
+      } finally {
+        setLoadingAreas(false);
       }
     };
 
     fetchRoles();
+    fetchAreas();
 
     if (userId) {
       const fetchUser = async () => {
@@ -68,10 +91,10 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
               idRol: user.idRol || '',
               estado: user.estado || 0,
               especializacion: user.datos?.especializacion || '',
-              area: user.datos?.area || '',
+              idArea: user.datos?.idArea || '',
             });
-            setIsUsuario(user.idRol === 2); // Usuario role
-            setIsTecnico(user.idRol === 3); // Técnico role
+            setIsUsuario(user.idRol === 2);
+            setIsTecnico(user.idRol === 3);
           } else {
             console.error('Error fetching user:', result.message);
           }
@@ -103,9 +126,10 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
     setFormData((prev) => ({
       ...prev,
       idRol: selectedRoleId,
+      idArea: selectedRoleId === 2 ? prev.idArea : '', // Reset idArea if not Usuario
     }));
-    setIsUsuario(selectedRoleId === 2); // Usuario
-    setIsTecnico(selectedRoleId === 3); // Técnico
+    setIsUsuario(selectedRoleId === 2);
+    setIsTecnico(selectedRoleId === 3);
   };
 
   const validateForm = () => {
@@ -116,7 +140,6 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
     if (!(formData.email || '').trim()) newErrors.email = 'El email debe completarse';
     if (!formData.idRol) newErrors.idRol = 'Debe especificar un rol';
 
-    // Fixed email validation syntax
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (formData.email && !emailRegex.test(formData.email)) {
       newErrors.email = 'El formato del correo electrónico no es correcto';
@@ -124,10 +147,10 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
 
     if (!isUpdating && !formData.password) newErrors.password = 'La contraseña es requerida';
     if (isTecnico && !(formData.especializacion || '').trim()) {
-      newErrors.especializacion = 'La especialización es requerida para técnicos'; // Fixed key
+      newErrors.especializacion = 'La especialización es requerida para técnicos';
     }
-    if (isUsuario && !(formData.area || '').trim()) {
-      newErrors.area = 'El área es requerida para usuarios';
+    if (isUsuario && !formData.idArea) {
+      newErrors.idArea = 'El área es requerida para usuarios';
     }
 
     setErrors(newErrors);
@@ -157,7 +180,7 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
 
       const response = await fetchWithAuth(url, {
         method,
-        headers: { 'Content-Type': 'application/json' }, // Fixed headers syntax
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
@@ -178,7 +201,7 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
             idRol: '',
             estado: 0,
             especializacion: '',
-            area: '',
+            idArea: '',
           });
           setIsUsuario(false);
           setIsTecnico(false);
@@ -312,7 +335,7 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
                     name="idRol"
                     value={formData.idRol}
                     onChange={handleRoleChange}
-                    disabled={loadingRoles} // Disable while loading
+                    disabled={loadingRoles}
                     className={`w-full pl-11 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white ${
                       errors.idRol ? 'border-red-500' : 'border-gray-300'
                     } ${loadingRoles ? 'cursor-not-allowed opacity-50' : ''}`}
@@ -363,18 +386,42 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
                     )}
 
                     {isUsuario && (
-                      <div>
-                        <input
-                          type="text"
-                          name="area"
-                          value={formData.area}
+                      <div className="relative">
+                        <Building className="absolute left-3 top-3 w-5 h-5 text-gray-400 z-10" />
+                        <select
+                          name="idArea"
+                          value={formData.idArea}
                           onChange={handleInputChange}
-                          placeholder="Área"
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
-                            errors.area ? 'border-red-500' : 'border-gray-300'
-                          }`}
-                        />
-                        {errors.area && <p className="text-red-500 text-sm mt-1">{errors.area}</p>}
+                          disabled={loadingAreas}
+                          className={`w-full pl-11 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white ${
+                            errors.idArea ? 'border-red-500' : 'border-gray-300'
+                          } ${loadingAreas ? 'cursor-not-allowed opacity-50' : ''}`}
+                        >
+                          {loadingAreas ? (
+                            <option value="" disabled>
+                              CARGANDO ÁREAS...
+                            </option>
+                          ) : areas.length === 0 ? (
+                            <option value="" disabled>
+                              NO HAY ÁREAS DISPONIBLES
+                            </option>
+                          ) : (
+                            <>
+                              <option value="">SELECCIONE ÁREA</option>
+                              {areas.map((area) => (
+                                <option key={area.idArea} value={area.idArea}>
+                                  {area.nombre.toUpperCase()}
+                                </option>
+                              ))}
+                            </>
+                          )}
+                        </select>
+                        <div className="absolute right-3 top-3 pointer-events-none">
+                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                        {errors.idArea && <p className="text-red-500 text-sm mt-1">{errors.idArea}</p>}
                       </div>
                     )}
                   </div>

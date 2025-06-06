@@ -1,7 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 
-const UserDetailsModal = ({ user, roles, setDetailsModalOpen }) => {
+const UserDetailsModal = ({ user, roles, areas, setDetailsModalOpen }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-8">
@@ -53,14 +53,15 @@ const UserDetailsModal = ({ user, roles, setDetailsModalOpen }) => {
           )}
           {user.idRol === 2 && (
             <p>
-              <strong>Área:</strong> {user.datos?.area || '-'}
+              <strong>Área:</strong>{' '}
+              {areas.find((area) => area.idArea === user.datos?.idArea)?.nombre.toUpperCase() || '-'}
             </p>
           )}
         </div>
         <div className="mt-8 flex justify-center">
           <button
             onClick={() => setDetailsModalOpen(false)}
-            className="bg-gray-300 text-gray-800 font-bold py-4 px-12 rounded-lg shadow-lg hover:bg-gray-400"
+            className="bg-gray-400 text-gray-800 font-bold py-4 px-12 rounded-lg hover:bg-gray-500"
           >
             CERRAR
           </button>
