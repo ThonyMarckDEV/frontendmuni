@@ -21,11 +21,11 @@ const ErrorPage = () => {
         <div className="text-center p-6 md:p-12">
           {/* Ícono con animación */}
           <div className="animate-in opacity-0 transform translate-y-8 transition-all duration-700 ease-out">
-            <FaRegAngry className="text-8xl text-bue-600 mb-8 mx-auto animate-bounce-slow" />
+            <FaRegAngry className="text-8xl text-blue-600 mb-8 mx-auto animate-bounce-slow" />
           </div>
           
           {/* Título "404" con efecto de glow */}
-          <h1 className="animate-in opacity-0 transform translate-y-8 transition-all duration-700 ease-out text-9xl font-bold text-transparent bg-clip-text bg-bue-700 mb-4 ">
+          <h1 className="animate-in opacity-0 transform translate-y-8 transition-all duration-700 ease-out text-9xl font-bold text-transparent bg-clip-text bg-blue-700 mb-4 ">
             401
           </h1>
           

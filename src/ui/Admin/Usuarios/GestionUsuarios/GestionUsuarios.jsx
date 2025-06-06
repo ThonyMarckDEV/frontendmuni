@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { fetchWithAuth } from '../../../js/authToken';
-import API_BASE_URL from '../../../js/urlHelper';
-import UserSearch from '../../../components/ui/Admin/GestionUsuariosComponents/UserSearch';
-import UserTable from '../../../components/ui/Admin/GestionUsuariosComponents/UserTable';
-import ActionBar from '../../../components/ui/Admin/GestionUsuariosComponents/ActionBar';
-import EditUserModal from '../../../components/ui/Admin/GestionUsuariosComponents/EditUserModal';
-import UserDetailsModal from '../../../components/ui/Admin/GestionUsuariosComponents/UserDetailsModal';
+import { fetchWithAuth } from '../../../../js/authToken';
+import API_BASE_URL from '../../../../js/urlHelper';
+import UserSearch from '../../../../components/ui/Admin/GestionUsuariosComponents/UserSearch';
+import UserTable from '../../../../components/ui/Admin/GestionUsuariosComponents/UserTable';
+import ActionBar from '../../../../components/ui/Admin/GestionUsuariosComponents/ActionBar';
+import EditUserModal from '../../../../components/ui/Admin/GestionUsuariosComponents/EditUserModal';
+import UserDetailsModal from '../../../../components/ui/Admin/GestionUsuariosComponents/UserDetailsModal';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);

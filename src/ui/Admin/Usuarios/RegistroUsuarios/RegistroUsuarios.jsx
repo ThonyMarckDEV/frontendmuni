@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Lock, Mail, Phone, CreditCard, Building, Users } from 'lucide-react';
-import { fetchWithAuth } from '../../../js/authToken';
-import API_BASE_URL from '../../../js/urlHelper';
+import { fetchWithAuth } from '../../../../js/authToken';
+import API_BASE_URL from '../../../../js/urlHelper';
 
 const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
   const [formData, setFormData] = useState({

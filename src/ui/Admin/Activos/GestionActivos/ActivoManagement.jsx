@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { fetchWithAuth } from '../../../js/authToken';
-import API_BASE_URL from '../../../js/urlHelper';
-import ActivoTable from '../../../components/ui/Admin/GestionActivosComponents/ActivoTable';
-import ActionBar from '../../../components/ui/Admin/GestionActivosComponents/ActionBar';
-import EditActivoModal from '../../../components/ui/Admin/GestionActivosComponents/EditActivoModal';
-import ActivoDetailsModal from '../../../components/ui/Admin/GestionActivosComponents/ActivoDetailsModal';
+import { fetchWithAuth } from '../../../../js/authToken';
+import API_BASE_URL from '../../../../js/urlHelper';
+import ActivoTable from '../../../../components/ui/Admin/GestionActivosComponents/ActivoTable';
+import ActionBar from '../../../../components/ui/Admin/GestionActivosComponents/ActionBar';
+import EditActivoModal from '../../../../components/ui/Admin/GestionActivosComponents/EditActivoModal';
+import ActivoDetailsModal from '../../../../components/ui/Admin/GestionActivosComponents/ActivoDetailsModal';
 
 const ActivoManagement = () => {
   const [activos, setActivos] = useState([]);
@@ -31,13 +31,23 @@ const ActivoManagement = () => {
           headers: { 'Content-Type': 'application/json' },
         });
         const result = await response.json();
-        if (result.success) {
-          setActivos(result.data.data);
+        console.log('Activos API response:', result); // Debug log
+        if (result.success && Array.isArray(result.data)) {
+          // Normalize idActivo to id
+          const normalizedActivos = result.data.map((activo) => ({
+            ...activo,
+            id: activo.idActivo,
+          }));
+          setActivos(normalizedActivos);
         } else {
-          console.error('Error fetching activos:', result.message);
+          setActivos([]);
+          console.error('Error fetching activos:', result.message || 'Invalid data format');
+          alert('Error al cargar activos');
         }
       } catch (error) {
-        console.error('Error fetching activos:', error);
+        console.error('Error fetching activos:', error.message);
+        setActivos([]);
+        alert('Error al cargar activos');
       } finally {
         setLoading(false);
       }
@@ -87,7 +97,7 @@ const ActivoManagement = () => {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12l4-4m-4 4l4 4" />
+            <path stroke="default" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6h12m0 0l-4-4m4 4l-4 4m-18-2h12m0 0l-4-4m4 4l-4 4" />
           </svg>
           Gestión de Activos
         </h1>
@@ -99,7 +109,7 @@ const ActivoManagement = () => {
         />
         {selectedActivos.length === 1 && (
           <ActionBar
-            activo={activos.find((activo) => activo.id === selectedActivos[0])}
+            activo={activos.find((activo) => activo.id === selectedActivos[0] || activo.idActivo === selectedActivos[0])}
             openEditModal={openEditModal}
             openDetailsModal={openDetailsModal}
           />
@@ -128,7 +138,7 @@ const ActivoManagement = () => {
                 const payload = Object.fromEntries(
                   Object.entries(formData).filter(([_, value]) => value !== '' && value !== null)
                 );
-                const response = await fetchWithAuth(`${API_BASE_URL}/api/activos/${currentActivo.id}`, {
+                const response = await fetchWithAuth(`${API_BASE_URL}/api/activos/${currentActivo.id || currentActivo.idActivo}`, {
                   method: 'PUT',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(payload),
@@ -138,7 +148,7 @@ const ActivoManagement = () => {
                   alert('Activo actualizado exitosamente');
                   setActivos((prev) =>
                     prev.map((activo) =>
-                      activo.id === currentActivo.id ? { ...activo, ...result.data } : activo
+                      (activo.id || activo.idActivo) === (currentActivo.id || currentActivo.idActivo) ? { ...activo, ...result.data, id: result.data.idActivo } : activo
                     )
                   );
                   closeEditModal();

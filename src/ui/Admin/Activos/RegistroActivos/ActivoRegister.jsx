@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { fetchWithAuth } from '../../../js/authToken';
-import API_BASE_URL from '../../../js/urlHelper';
+import { fetchWithAuth } from '../../../../js/authToken';
+import API_BASE_URL from '../../../../js/urlHelper';
 import { Server, MapPin, Tag } from 'lucide-react';
 
 const ActivoRegister = () => {

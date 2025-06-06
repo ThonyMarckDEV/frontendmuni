@@ -1,11 +1,14 @@
 import React from 'react';
 
-const ActivoTable = ({ activos, loading, selectedActivos, handleSelectActivo }) => {
-  // Safeguard: Ensure activos is an array, log if invalid
-  const safeActivos = Array.isArray(activos) ? activos : [];
-  if (!Array.isArray(activos)) {
-    console.warn('ActivoTable received invalid activos prop:', activos);
-  }
+const ActivoAreaTable = ({ assignedActivos, loadingAssigned, selectedActivoArea, handleSelectActivoArea }) => {
+  // Filter out invalid items and log them for debugging
+  const validActivos = assignedActivos.filter((activo) => {
+    if (!activo.id && !activo.idActivo) {
+      console.warn('Invalid activo in assignedActivos:', activo);
+      return false;
+    }
+    return true;
+  });
 
   return (
     <div className="bg-white rounded-lg shadow overflow-x-auto">
@@ -13,10 +16,7 @@ const ActivoTable = ({ activos, loading, selectedActivos, handleSelectActivo }) 
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Código de Inventario
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Ubicación
+              Código Inventario
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Tipo
@@ -30,32 +30,28 @@ const ActivoTable = ({ activos, loading, selectedActivos, handleSelectActivo }) 
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {loading ? (
+          {loadingAssigned ? (
             <tr key="loading-row">
-              <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
-                Cargando activos...
+              <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
+                Cargando activos asignados...
               </td>
             </tr>
-          ) : safeActivos.length === 0 ? (
+          ) : validActivos.length === 0 ? (
             <tr key="no-activos-row">
-              <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
-                No se encontraron activos
+              <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
+                No hay activos asignados a esta área
               </td>
             </tr>
           ) : (
-            safeActivos.map((activo) => (
+            validActivos.map((activo, index) => (
               <tr
-                key={`activo-row-${activo.id || activo.idActivo}`}
+                key={`activo-area-row-${activo.id || activo.idActivo || index}`}
                 className={`hover:bg-gray-50 cursor-pointer ${
-                  selectedActivos.includes(activo.id || activo.idActivo) ? 'bg-blue-100' : ''
+                  selectedActivoArea === (activo.id || activo.idActivo) ? 'bg-blue-100' : ''
                 }`}
-                onClick={() => {
-                  console.log(`Row clicked for activo ID: ${activo.id || activo.idActivo}`);
-                  handleSelectActivo(activo.id || activo.idActivo);
-                }}
+                onClick={() => handleSelectActivoArea(activo.id || activo.idActivo)}
               >
                 <td className="px-6 py-4 whitespace-nowrap">{activo.codigo_inventario || '-'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{activo.ubicacion || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{activo.tipo || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{activo.marca_modelo || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -76,4 +72,4 @@ const ActivoTable = ({ activos, loading, selectedActivos, handleSelectActivo }) 
   );
 };
 
-export default ActivoTable;
+export default ActivoAreaTable;

@@ -19,10 +19,15 @@ import LoginUI from './ui/Home';
 
 // UIS ADMIN
 import HomeAdmin from './ui/Admin/Home/HomeAdmin';
-import RegistroUsuarios from './ui/Admin/RegistroUsuarios/RegistroUsuarios';
-import GestionUsuarios from './ui/Admin/GestionUsuarios/GestionUsuarios';
-import RegistroActivos from './ui/Admin/RegistroActivos/ActivoRegister';
-import GestionActivos from './ui/Admin/GestionActivos/ActivoManagement';
+import RegistroUsuarios from './ui/Admin/Usuarios/RegistroUsuarios/RegistroUsuarios';
+import GestionUsuarios from './ui/Admin/Usuarios/GestionUsuarios/GestionUsuarios';
+import RegistroActivos from './ui/Admin/Activos/RegistroActivos/ActivoRegister';
+import GestionActivos from './ui/Admin/Activos/GestionActivos/ActivoManagement';
+import RegistroAreas from './ui/Admin/Areas/RegistroAreas/RegistroAreas';
+import GestionAreas from './ui/Admin/Areas/GestionAreas/AreaManagement';
+import RegistroActivosAreas from './ui/Admin/Activos-Areas/RegistroActivos-Areas/RegistroActivosAreas';
+import GestionActivosAreas from './ui/Admin/Activos-Areas/GestionActivos-Areas/ActivoAreaManagement';
+
 
 // UIS USUARIOS
 import HomeUsuario from './ui/Usuario/Home/HomeUsuario';
@@ -48,6 +53,10 @@ function AppContent() {
       <Route path="/admin/gestion-usuarios" element={<ProtectedRouteAdmin element={<GestionUsuarios />} />} />
       <Route path="/admin/registro-activos" element={<ProtectedRouteAdmin element={<RegistroActivos />} />} />
       <Route path="/admin/gestion-activos" element={<ProtectedRouteAdmin element={<GestionActivos />} />} />
+      <Route path="/admin/registro-areas" element={<ProtectedRouteAdmin element={<RegistroAreas />} />} />
+      <Route path="/admin/gestion-areas" element={<ProtectedRouteAdmin element={<GestionAreas />} />} />
+      <Route path="/admin/registro-activos-areas" element={<ProtectedRouteAdmin element={<RegistroActivosAreas />} />} />
+      <Route path="/admin/gestion-activos-areas" element={<ProtectedRouteAdmin element={<GestionActivosAreas />} />} />
 
       {/* Rutas Usuario */}
       <Route path="/usuario" element={<ProtectedRouteUsuario element={<HomeUsuario />} />} />

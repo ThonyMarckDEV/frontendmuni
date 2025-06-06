@@ -22,6 +22,8 @@ const Sidebar = () => {
   const [isUsersDropdownOpen, setIsUsersDropdownOpen] = useState(false);
   const [isActivosDropdownOpen, setIsActivosDropdownOpen] = useState(false);
   const [isIncidentesDropdownOpen, setIsIncidentesDropdownOpen] = useState(false);
+  const [isAreasDropdownOpen, setIsAreasDropdownOpen] = useState(false);
+  const [isActivosAreasDropdownOpen, setIsActivosAreasDropdownOpen] = useState(false);
   const [isManualToggle, setIsManualToggle] = useState(false); // Track manual toggle
   const sidebarRef = useRef(null);
   const location = useLocation();
@@ -51,6 +53,22 @@ const Sidebar = () => {
             ]
           },
           { icon: AlertTriangle, label: 'Incidentes', path: '/admin/incidentes' },
+          {
+            icon: Settings,
+            label: 'Areas',
+            subItems: [
+              { label: 'Areas', path: '/admin/registro-areas' },
+              { label: 'Gestión de Areas', path: '/admin/gestion-areas' },
+            ]
+          },
+          {
+            icon: Settings,
+            label: 'Activos/Areas',
+            subItems: [
+              { label: 'Activos - Areas', path: '/admin/registro-activos-areas' },
+              { label: 'Gestión de Activos-Areas', path: '/admin/gestion-activos-areas' },
+            ]
+          },
         ];
       case 'tecnico':
         return [
@@ -119,6 +137,18 @@ const Sidebar = () => {
         .find(item => item.label === 'Incidentes')
         ?.subItems?.some(subItem => location.pathname === subItem.path);
       setIsIncidentesDropdownOpen(isIncidentesSubItemActive || false);
+
+      const isAreasSubItemActive = menuItems
+        .find(item => item.label === 'Areas')
+        ?.subItems?.some(subItem => location.pathname === subItem.path);
+      setIsAreasDropdownOpen(isAreasSubItemActive || false);
+
+      const isActivosAreasSubItemActive = menuItems
+        .find(item => item.label === 'Activos/Areass')
+        ?.subItems?.some(subItem => location.pathname === subItem.path);
+      setIsActivosAreasDropdownOpen(isActivosAreasSubItemActive || false);
+     
+      
     }
   }, [location.pathname, menuItems, isManualToggle]);
 
@@ -130,6 +160,10 @@ const Sidebar = () => {
       setIsActivosDropdownOpen(prev => !prev);
     } else if (label === 'Incidentes') {
       setIsIncidentesDropdownOpen(prev => !prev);
+    }else if (label === 'Areas') {
+      setIsAreasDropdownOpen(prev => !prev);
+    }else if (label === 'Activos/Areas') {
+      setIsActivosAreasDropdownOpen(prev => !prev);
     }
   };
 
@@ -206,7 +240,9 @@ const Sidebar = () => {
                         <Icon size={18} className="mr-3" />
                         {item.label}
                         {(item.label === 'Gestión y Usuarios' && isUsersDropdownOpen) || 
-                         (item.label === 'Activos' && isActivosDropdownOpen) || 
+                         (item.label === 'Activos' && isActivosDropdownOpen) ||
+                         (item.label === 'Areas' && isAreasDropdownOpen) ||
+                         (item.label === 'Activos/Areas' && isActivosAreasDropdownOpen) ||
                          (item.label === 'Incidentes' && isIncidentesDropdownOpen) ? (
                           <ChevronDown size={18} className="ml-auto" />
                         ) : (
@@ -215,6 +251,8 @@ const Sidebar = () => {
                       </button>
                       {(item.label === 'Gestión y Usuarios' && isUsersDropdownOpen) || 
                        (item.label === 'Activos' && isActivosDropdownOpen) || 
+                       (item.label === 'Areas' && isAreasDropdownOpen) ||
+                       (item.label === 'Activos/Areas' && isActivosAreasDropdownOpen) ||
                        (item.label === 'Incidentes' && isIncidentesDropdownOpen) ? (
                         <ul className="ml-6 space-y-1">
                           {item.subItems.map((subItem, subIndex) => (
