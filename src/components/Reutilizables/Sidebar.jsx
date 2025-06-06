@@ -11,7 +11,10 @@ import {
   Menu,
   ChevronDown,
   ChevronRight,
-  Wrench
+  Wrench,
+  Monitor, // Para Activos
+  MapPin,  // Para Áreas
+  Layers   // Para Activos/Áreas
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { logout } from '../../js/logout';
@@ -24,7 +27,7 @@ const Sidebar = () => {
   const [isIncidentesDropdownOpen, setIsIncidentesDropdownOpen] = useState(false);
   const [isAreasDropdownOpen, setIsAreasDropdownOpen] = useState(false);
   const [isActivosAreasDropdownOpen, setIsActivosAreasDropdownOpen] = useState(false);
-  const [isManualToggle, setIsManualToggle] = useState(false); // Track manual toggle
+  const [isManualToggle, setIsManualToggle] = useState(false);
   const sidebarRef = useRef(null);
   const location = useLocation();
 
@@ -45,30 +48,30 @@ const Sidebar = () => {
             ]
           },
           {
-            icon: Settings,
+            icon: Monitor,
             label: 'Activos',
             subItems: [
               { label: 'Activos', path: '/admin/registro-activos' },
               { label: 'Gestión de Activos', path: '/admin/gestion-activos' },
             ]
           },
+          {
+            icon: MapPin,
+            label: 'Áreas',
+            subItems: [
+              { label: 'Áreas', path: '/admin/registro-areas' },
+              { label: 'Gestión de Áreas', path: '/admin/gestion-areas' },
+            ]
+          },
+          {
+            icon: Layers,
+            label: 'Activos/Áreas',
+            subItems: [
+              { label: 'Activos - Áreas', path: '/admin/registro-activos-areas' },
+              { label: 'Gestión de Activos-Áreas', path: '/admin/gestion-activos-areas' },
+            ]
+          },
           { icon: AlertTriangle, label: 'Incidentes', path: '/admin/incidentes' },
-          {
-            icon: Settings,
-            label: 'Areas',
-            subItems: [
-              { label: 'Areas', path: '/admin/registro-areas' },
-              { label: 'Gestión de Areas', path: '/admin/gestion-areas' },
-            ]
-          },
-          {
-            icon: Settings,
-            label: 'Activos/Areas',
-            subItems: [
-              { label: 'Activos - Areas', path: '/admin/registro-activos-areas' },
-              { label: 'Gestión de Activos-Areas', path: '/admin/gestion-activos-areas' },
-            ]
-          },
         ];
       case 'tecnico':
         return [
@@ -121,7 +124,6 @@ const Sidebar = () => {
   }, [isOpen]);
 
   useEffect(() => {
-    // Only update dropdown states on initial mount or route change if not manually toggled
     if (!isManualToggle) {
       const isUsersSubItemActive = menuItems
         .find(item => item.label === 'Gestión y Usuarios')
@@ -139,37 +141,35 @@ const Sidebar = () => {
       setIsIncidentesDropdownOpen(isIncidentesSubItemActive || false);
 
       const isAreasSubItemActive = menuItems
-        .find(item => item.label === 'Areas')
+        .find(item => item.label === 'Áreas')
         ?.subItems?.some(subItem => location.pathname === subItem.path);
       setIsAreasDropdownOpen(isAreasSubItemActive || false);
 
       const isActivosAreasSubItemActive = menuItems
-        .find(item => item.label === 'Activos/Areass')
+        .find(item => item.label === 'Activos/Áreas')
         ?.subItems?.some(subItem => location.pathname === subItem.path);
       setIsActivosAreasDropdownOpen(isActivosAreasSubItemActive || false);
-     
-      
     }
   }, [location.pathname, menuItems, isManualToggle]);
 
   const handleDropdownToggle = (label) => {
-    setIsManualToggle(true); // Mark as manual toggle
+    setIsManualToggle(true);
     if (label === 'Gestión y Usuarios') {
       setIsUsersDropdownOpen(prev => !prev);
     } else if (label === 'Activos') {
       setIsActivosDropdownOpen(prev => !prev);
     } else if (label === 'Incidentes') {
       setIsIncidentesDropdownOpen(prev => !prev);
-    }else if (label === 'Areas') {
+    } else if (label === 'Áreas') {
       setIsAreasDropdownOpen(prev => !prev);
-    }else if (label === 'Activos/Areas') {
+    } else if (label === 'Activos/Áreas') {
       setIsActivosAreasDropdownOpen(prev => !prev);
     }
   };
 
   const handleSubItemClick = () => {
-    setIsOpen(false); // Close sidebar on mobile
-    setIsManualToggle(false); // Reset manual toggle after selecting a sub-item
+    setIsOpen(false);
+    setIsManualToggle(false);
   };
 
   return (
@@ -241,8 +241,8 @@ const Sidebar = () => {
                         {item.label}
                         {(item.label === 'Gestión y Usuarios' && isUsersDropdownOpen) || 
                          (item.label === 'Activos' && isActivosDropdownOpen) ||
-                         (item.label === 'Areas' && isAreasDropdownOpen) ||
-                         (item.label === 'Activos/Areas' && isActivosAreasDropdownOpen) ||
+                         (item.label === 'Áreas' && isAreasDropdownOpen) ||
+                         (item.label === 'Activos/Áreas' && isActivosAreasDropdownOpen) ||
                          (item.label === 'Incidentes' && isIncidentesDropdownOpen) ? (
                           <ChevronDown size={18} className="ml-auto" />
                         ) : (
@@ -251,8 +251,8 @@ const Sidebar = () => {
                       </button>
                       {(item.label === 'Gestión y Usuarios' && isUsersDropdownOpen) || 
                        (item.label === 'Activos' && isActivosDropdownOpen) || 
-                       (item.label === 'Areas' && isAreasDropdownOpen) ||
-                       (item.label === 'Activos/Areas' && isActivosAreasDropdownOpen) ||
+                       (item.label === 'Áreas' && isAreasDropdownOpen) ||
+                       (item.label === 'Activos/Áreas' && isActivosAreasDropdownOpen) ||
                        (item.label === 'Incidentes' && isIncidentesDropdownOpen) ? (
                         <ul className="ml-6 space-y-1">
                           {item.subItems.map((subItem, subIndex) => (
