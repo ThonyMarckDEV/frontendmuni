@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { fetchWithAuth } from '../../../js/authToken';
-import API_BASE_URL from '../../../js/urlHelper';
-import IncidenteTable from '../../../components/ui/Usuario/GestionIncidentesComponents/IncidenteTable';
-import ActionBar from '../../../components/ui/Usuario/GestionIncidentesComponents/ActionBar';
-import EditIncidenteModal from '../../../components/ui/Usuario/GestionIncidentesComponents/EditIncidenteModal';
-import IncidenteDetailsModal from '../../../components/ui/Usuario/GestionIncidentesComponents/IncidenteDetailsModal';
+import { fetchWithAuth } from '../../../../js/authToken';
+import API_BASE_URL from '../../../../js/urlHelper';
+import IncidenteTable from '../../../../components/ui/Usuario/GestionIncidentesComponents/IncidenteTable';
+import ActionBar from '../../../../components/ui/Usuario/GestionIncidentesComponents/ActionBar';
+import EditIncidenteModal from '../../../../components/ui/Usuario/GestionIncidentesComponents/EditIncidenteModal';
+import IncidenteDetailsModal from '../../../../components/ui/Usuario/GestionIncidentesComponents/IncidenteDetailsModal';
 
 const IncidenteManagement = () => {
   const [incidentes, setIncidentes] = useState([]);
@@ -16,7 +16,7 @@ const IncidenteManagement = () => {
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [currentIncidente, setCurrentIncidente] = useState(null);
   const [formData, setFormData] = useState({
-    activo_id: '',
+    idActivo: '',
     descripcion: '',
     fecha_reporte: '',
     prioridad: '0',
@@ -80,7 +80,7 @@ const IncidenteManagement = () => {
   const openEditModal = (incidente) => {
     setCurrentIncidente(incidente);
     setFormData({
-      activo_id: incidente.activo?.idActivo || '',
+      idActivo: incidente.activo?.idActivo || '',
       descripcion: incidente.descripcion || '',
       fecha_reporte: incidente.fecha_reporte || '',
       prioridad: String(incidente.prioridad) || '0',
@@ -147,7 +147,7 @@ const IncidenteManagement = () => {
               setLoading(true);
               try {
                 const payload = {
-                  activo_id: parseInt(formData.activo_id),
+                  idActivo: parseInt(formData.idActivo),
                   descripcion: formData.descripcion,
                   fecha_reporte: formData.fecha_reporte,
                   prioridad: parseInt(formData.prioridad),

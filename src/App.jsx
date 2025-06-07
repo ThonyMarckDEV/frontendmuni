@@ -32,7 +32,7 @@ import GestionActivosAreas from './ui/Admin/Activos-Areas/GestionActivos-Areas/A
 // UIS USUARIOS
 import HomeUsuario from './ui/Usuario/Home/HomeUsuario';
 import RegistroIncidentes from './ui/Usuario/Incidentes/RegistroIncidentes/IncidenteRegister';
-import GestionIncidentes from './ui/Usuario/GestionIncidentes/IncidenteManagement';
+import GestionIncidentes from './ui/Usuario/Incidentes/GestionIncidentes/IncidenteManagement';
 
 // Utilities
 import ProtectedRouteHome from './utilities/ProtectedRouteHome';

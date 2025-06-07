@@ -29,6 +29,11 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
     }
   };
 
+  const formatActivo = (activo) => {
+    if (!activo) return '-';
+    return `COD: ${activo.codigo_inventario} - TIPO: ${activo.tipo} - MARCA: ${activo.marca_modelo} - UBICACION: ${activo.ubicacion} `;
+  };
+
   return (
     <div className="bg-white rounded-lg shadow overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
@@ -80,7 +85,7 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
                 }}
               >
                 <td className="px-6 py-4 whitespace-nowrap">{incidente.area?.nombre?.toUpperCase() || '-'}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{incidente.activo?.codigo_inventario || '-'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatActivo(incidente.activo)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{incidente.descripcion || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{formatDate(incidente.fecha_reporte)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">

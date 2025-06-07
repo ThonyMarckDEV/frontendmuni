@@ -71,7 +71,7 @@ const EditIncidenteModal = ({
                       <option value="">SELECCIONE ACTIVO</option>
                       {activos.map((activo) => (
                         <option key={activo.idActivo} value={activo.idActivo}>
-                          {activo.codigo_inventario}
+                         COD: {activo.codigo_inventario} - MARCA: {activo.marca_modelo} -  TIPO: {activo.tipo} 
                         </option>
                       ))}
                     </>

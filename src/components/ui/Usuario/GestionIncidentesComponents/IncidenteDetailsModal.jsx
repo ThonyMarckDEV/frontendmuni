@@ -12,27 +12,20 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
   const getEstadoText = (estado) => {
     switch (estado) {
       case 0: return 'Pendiente';
-      case 1:
-        return 'En progreso';
-      case 2:
-        return 'Resuelto';
-      default:
-        return '-';
+      case 1: return 'En progreso';
+      case 2: return 'Resuelto';
+      default: return '-';
     }
-  }
+  };
 
   const getPrioridadText = (prioridad) => {
     switch (prioridad) {
-      case 0:
-        return 'Baja';
-      case 1:
-        return 'Media';
-      case 2:
-        return 'Alta';
-      default:
-        return '-';
+      case 0: return 'Baja';
+      case 1: return 'Media';
+      case 2: return 'Alta';
+      default: return '-';
     }
-  }
+  };
 
   const formatDate = (date) => {
     try {
@@ -42,13 +35,18 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
     }
   };
 
+  const formatActivo = (activo) => {
+    if (!activo) return '-';
+    return `COD: ${activo.codigo_inventario} - TIPO: ${activo.tipo} - MARCA: ${activo.marca_modelo} - UBICACION: ${activo.ubicacion}`;
+  };
+
   const estadoText = getEstadoText(incidente.estado);
   const prioridadText = getPrioridadText(incidente.prioridad);
 
   const handleDownloadPdf = async () => {
     setIsLoading(true);
     try {
-      const response = fetchWithAuth(`${API_BASE_URL}/api/incidentes/${incidente.idIncidente}/pdf`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes/${incidente.idIncidente}/pdf`, {
         method: 'GET',
         headers: {
           'Accept': 'application/pdf',
@@ -78,7 +76,7 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
 
   return (
     <>
-      {isLoading && <FetchWithGif />} {/* Mostrar el GIF mientras isLoading es true */}
+      {isLoading && <FetchWithGif />}
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 flex justify-between items-center">
@@ -103,7 +101,7 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Activo:</span>
-                  {incidente.activo?.codigo_inventario || '-'}
+                  {formatActivo(incidente.activo)}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Descripción:</span>
@@ -119,7 +117,7 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
                         ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-green-100 text-green-800'
                     }`}
-                    >
+                  >
                     {prioridadText}
                   </span>
                 </div>
@@ -143,7 +141,7 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
                         ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-red-100 text-red-800'
                     }`}
-                    >
+                  >
                     {estadoText}
                   </span>
                 </div>
@@ -156,14 +154,14 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
                 className={`bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-12 rounded-lg shadow-lg transform transition-all duration-200 flex items-center gap-2 ${
                   isLoading ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
-                >
+              >
                 <Download className="w-5 h-5" />
                 DESCARGAR PDF
               </button>
               <button
                 onClick={() => setDetailsModalOpen(false)}
                 className="bg-gray-300 text-gray-800 font-bold py-4 px-12 rounded-lg shadow-lg hover:bg-gray-400"
-                >
+              >
                 CERRAR
               </button>
             </div>
