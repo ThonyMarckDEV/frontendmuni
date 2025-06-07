@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { fetchWithAuth } from '../../../../js/authToken';
 import API_BASE_URL from '../../../../js/urlHelper';
 import IncidenteTable from '../../../../components/ui/Usuario/GestionIncidentesComponents/IncidenteTable';
-import ActionBar from '../../../../components/ui/Usuario/GestionIncidentesComponents/ActionBar';
 import EditIncidenteModal from '../../../../components/ui/Usuario/GestionIncidentesComponents/EditIncidenteModal';
 import IncidenteDetailsModal from '../../../../components/ui/Usuario/GestionIncidentesComponents/IncidenteDetailsModal';
 
@@ -117,14 +116,9 @@ const IncidenteManagement = () => {
           loading={loading}
           selectedIncidentes={selectedIncidentes}
           handleSelectIncidente={handleSelectIncidente}
+          openEditModal={openEditModal}
+          openDetailsModal={openDetailsModal}
         />
-        {selectedIncidentes.length === 1 && (
-          <ActionBar
-            incidente={incidentes.find((incidente) => incidente.idIncidente === selectedIncidentes[0])}
-            openEditModal={openEditModal}
-            openDetailsModal={openDetailsModal}
-          />
-        )}
         {editModalOpen && (
           <EditIncidenteModal
             formData={formData}
@@ -136,7 +130,7 @@ const IncidenteManagement = () => {
               e.preventDefault();
               const validateForm = () => {
                 const newErrors = {};
-                if (!formData.activo_id) newErrors.activo_id = 'El activo es requerido';
+                if (!formData.idActivo) newErrors.idActivo = 'El activo es requerido';
                 if (!(formData.descripcion || '').trim()) newErrors.descripcion = 'La descripción es requerida';
                 if (!(formData.fecha_reporte || '').trim()) newErrors.fecha_reporte = 'La fecha de reporte es requerida';
                 if (!['0', '1', '2'].includes(formData.prioridad)) newErrors.prioridad = 'La prioridad es requerida';
