@@ -143,12 +143,11 @@ const IncidenteRegister = () => {
               </h3>
               <div className="relative">
                 <Building className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                <Lock className="absolute left-10 top-3 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
                   value={loadingUserArea ? 'Cargando...' : userArea ? userArea.nombre.toUpperCase() : 'Sin área asignada'}
                   disabled
-                  className="w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
                 />
                 {errors.general && userArea === null && (
                   <p className="text-red-500 text-sm mt-1">{errors.general}</p>
