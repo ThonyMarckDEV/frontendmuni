@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { fetchWithAuth } from '../../../js/authToken';
-import API_BASE_URL from '../../../js/urlHelper';
+import { fetchWithAuth } from '../../../../js/authToken';
+import API_BASE_URL from '../../../../js/urlHelper';
 import { AlertTriangle, Calendar, Building, Lock } from 'lucide-react';
 
 const IncidenteRegister = () => {
   const [formData, setFormData] = useState({
-    activo_id: '',
+    idActivo: '',
     titulo: '',
     descripcion: '',
     fecha_reporte: new Date().toISOString().split('T')[0],
@@ -84,7 +84,7 @@ const IncidenteRegister = () => {
     e.preventDefault();
     const validateForm = () => {
       const newErrors = {};
-      if (!formData.activo_id) newErrors.activo_id = 'El activo es requerido';
+      if (!formData.idActivo) newErrors.idActivo = 'El activo es requerido';
       if (!(formData.descripcion || '').trim()) newErrors.descripcion = 'La descripción es requerida';
       if (!(formData.fecha_reporte || '').trim()) newErrors.fecha_reporte = 'La fecha de reporte es requerida';
       if (!['0', '1', '2'].includes(formData.prioridad)) newErrors.prioridad = 'La prioridad es requerida';
@@ -95,7 +95,7 @@ const IncidenteRegister = () => {
     setLoading(true);
     try {
       const payload = {
-        activo_id: parseInt(formData.activo_id),
+        idActivo: parseInt(formData.idActivo),
         titulo: formData.titulo || null,
         descripcion: formData.descripcion,
         fecha_reporte: formData.fecha_reporte,
@@ -110,7 +110,7 @@ const IncidenteRegister = () => {
       if (result.success) {
         alert('Incidente registrado exitosamente');
         setFormData({
-          activo_id: '',
+          idActivo: '',
           titulo: '',
           descripcion: '',
           fecha_reporte: new Date().toISOString().split('T')[0],
@@ -156,12 +156,12 @@ const IncidenteRegister = () => {
               </div>
               <div className="relative">
                 <select
-                  name="activo_id"
-                  value={formData.activo_id}
+                  name="idActivo"
+                  value={formData.idActivo}
                   onChange={handleInputChange}
                   disabled={loadingActivos || activos.length === 0 || loadingUserArea || !userArea}
                   className={`w-full pl-4 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white ${
-                    errors.activo_id ? 'border-red-500' : 'border-gray-300'
+                    errors.idActivo ? 'border-red-500' : 'border-gray-300'
                   } ${loadingActivos || activos.length === 0 || loadingUserArea || !userArea ? 'cursor-not-allowed opacity-50' : ''}`}
                 >
                   {loadingActivos ? (
@@ -177,7 +177,7 @@ const IncidenteRegister = () => {
                       <option value="">SELECCIONE ACTIVO</option>
                       {activos.map((activo) => (
                         <option key={activo.idActivo} value={activo.idActivo}>
-                           COD: {activo.codigo_inventario} - MARCA: {activo.marca_modelo} -  TIPO: {activo.tipo} 
+                          COD: {activo.codigo_inventario} - MARCA: {activo.marca_modelo} - TIPO: {activo.tipo}
                         </option>
                       ))}
                     </>
@@ -188,7 +188,7 @@ const IncidenteRegister = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
-                {errors.activo_id && <p className="text-red-500 text-sm mt-1">{errors.activo_id}</p>}
+                {errors.idActivo && <p className="text-red-500 text-sm mt-1">{errors.idActivo}</p>}
               </div>
               <div className="relative">
                 <input
@@ -280,7 +280,7 @@ const IncidenteRegister = () => {
               type="button"
               onClick={() =>
                 setFormData({
-                  activo_id: '',
+                  idActivo: '',
                   titulo: '',
                   descripcion: '',
                   fecha_reporte: new Date().toISOString().split('T')[0],
