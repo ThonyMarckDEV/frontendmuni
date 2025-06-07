@@ -126,7 +126,7 @@ const Sidebar = () => {
   useEffect(() => {
     if (!isManualToggle) {
       const isUsersSubItemActive = menuItems
-        .find(item => item.label === 'Gestión y Usuarios')
+        .find(item => item.label === 'Usuarios')
         ?.subItems?.some(subItem => location.pathname === subItem.path);
       setIsUsersDropdownOpen(isUsersSubItemActive || false);
 
@@ -154,7 +154,7 @@ const Sidebar = () => {
 
   const handleDropdownToggle = (label) => {
     setIsManualToggle(true);
-    if (label === 'Gestión y Usuarios') {
+    if (label === 'Usuarios') {
       setIsUsersDropdownOpen(prev => !prev);
     } else if (label === 'Activos') {
       setIsActivosDropdownOpen(prev => !prev);
@@ -239,7 +239,7 @@ const Sidebar = () => {
                       >
                         <Icon size={18} className="mr-3" />
                         {item.label}
-                        {(item.label === 'Gestión y Usuarios' && isUsersDropdownOpen) || 
+                        {(item.label === 'Usuarios' && isUsersDropdownOpen) || 
                          (item.label === 'Activos' && isActivosDropdownOpen) ||
                          (item.label === 'Áreas' && isAreasDropdownOpen) ||
                          (item.label === 'Activos/Áreas' && isActivosAreasDropdownOpen) ||
@@ -249,7 +249,7 @@ const Sidebar = () => {
                           <ChevronRight size={18} className="ml-auto" />
                         )}
                       </button>
-                      {(item.label === 'Gestión y Usuarios' && isUsersDropdownOpen) || 
+                      {(item.label === 'Usuarios' && isUsersDropdownOpen) || 
                        (item.label === 'Activos' && isActivosDropdownOpen) || 
                        (item.label === 'Áreas' && isAreasDropdownOpen) ||
                        (item.label === 'Activos/Áreas' && isActivosAreasDropdownOpen) ||

@@ -1,24 +1,68 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import ActionBar from './ActionBar';
+import { AlertCircle, Clock, CheckCircle2, User, MapPin, Edit, Eye } from 'lucide-react';
 
 const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectIncidente, openEditModal, openDetailsModal }) => {
-  const getEstadoText = (estado) => {
+  const getEstadoConfig = (estado) => {
     switch (estado) {
-      case 0: return 'Pendiente';
-      case 1: return 'En progreso';
-      case 2: return 'Resuelto';
-      default: return '-';
+      case 0: return {
+        text: 'Pendiente',
+        icon: AlertCircle,
+        bgColor: 'bg-amber-100',
+        textColor: 'text-amber-800',
+        borderColor: 'border-amber-200'
+      };
+      case 1: return {
+        text: 'En Progreso',
+        icon: Clock,
+        bgColor: 'bg-blue-100',
+        textColor: 'text-blue-800',
+        borderColor: 'border-blue-200'
+      };
+      case 2: return {
+        text: 'Resuelto',
+        icon: CheckCircle2,
+        bgColor: 'bg-emerald-100',
+        textColor: 'text-emerald-800',
+        borderColor: 'border-emerald-200'
+      };
+      default: return {
+        text: '-',
+        icon: AlertCircle,
+        bgColor: 'bg-gray-100',
+        textColor: 'text-gray-800',
+        borderColor: 'border-gray-200'
+      };
     }
   };
 
-  const getPrioridadText = (prioridad) => {
+  const getPrioridadConfig = (prioridad) => {
     switch (prioridad) {
-      case 0: return 'Baja';
-      case 1: return 'Media';
-      case 2: return 'Alta';
-      default: return '-';
+      case 0: return {
+        text: 'Baja',
+        bgColor: 'bg-green-50',
+        borderColor: 'border-green-200',
+        accentColor: 'bg-green-500'
+      };
+      case 1: return {
+        text: 'Media',
+        bgColor: 'bg-yellow-50',
+        borderColor: 'border-yellow-200',
+        accentColor: 'bg-yellow-500'
+      };
+      case 2: return {
+        text: 'Alta',
+        bgColor: 'bg-red-50',
+        borderColor: 'border-red-200',
+        accentColor: 'bg-red-500'
+      };
+      default: return {
+        text: '-',
+        bgColor: 'bg-gray-50',
+        borderColor: 'border-gray-200',
+        accentColor: 'bg-gray-500'
+      };
     }
   };
 
@@ -31,8 +75,12 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
   };
 
   const formatActivo = (activo) => {
-    if (!activo) return '-';
-    return `COD: ${activo.codigo_inventario} - TIPO: ${activo.tipo} - MARCA: ${activo.marca_modelo} - UBICACION: ${activo.ubicacion}`;
+    if (!activo) return 'No especificado';
+    const parts = [];
+    if (activo.codigo_inventario) parts.push(`${activo.codigo_inventario}`);
+    if (activo.tipo) parts.push(activo.tipo);
+    if (activo.marca_modelo) parts.push(activo.marca_modelo);
+    return parts.join(' • ') || 'No especificado';
   };
 
   const formatTecnico = (tecnico) => {
@@ -40,71 +88,148 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
     return `${tecnico.nombre} ${tecnico.apellido}`;
   };
 
+  const formatUbicacion = (activo) => {
+    return activo?.ubicacion || 'No especificada';
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-3"></div>
+          <p className="text-gray-600 font-medium">Cargando incidentes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (incidentes.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <AlertCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+        <p className="text-gray-600 font-medium text-lg">No se encontraron incidentes</p>
+        <p className="text-gray-500 text-sm mt-1">Los incidentes aparecerán aquí cuando estén disponibles</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4">
-      {loading ? (
-        <div className="text-center text-gray-500">Cargando incidentes...</div>
-      ) : incidentes.length === 0 ? (
-        <div className="text-center text-gray-500">No se encontraron incidentes</div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {incidentes.map((incidente) => (
+    <div className="p-4 sm:p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">{incidentes.map((incidente) => {
+          const estadoConfig = getEstadoConfig(incidente.estado);
+          const prioridadConfig = getPrioridadConfig(incidente.prioridad);
+          const EstadoIcon = estadoConfig.icon;
+
+          return (
             <div
               key={`incidente-card-${incidente.idIncidente}`}
-              className={`p-4 rounded-lg shadow-lg cursor-pointer transform transition hover:scale-105 ${
-                selectedIncidentes.includes(incidente.idIncidente) ? 'border-2 border-blue-500' : ''
-              } ${
-                incidente.prioridad === 2
-                  ? 'bg-red-50'
-                  : incidente.prioridad === 1
-                  ? 'bg-yellow-50'
-                  : 'bg-green-50'
-              }`}
-              style={{
-                minHeight: '250px',
-                backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3))',
-                boxShadow: '5px 5px 15px rgba(0,0,0,0.2)',
-              }}
+              className={`
+                relative bg-white rounded-xl border-2 transition-all duration-300 cursor-pointer hover:shadow-xl hover:-translate-y-1 w-full
+                ${selectedIncidentes.includes(incidente.idIncidente) 
+                  ? 'border-indigo-500 shadow-lg ring-2 ring-indigo-200' 
+                  : `${prioridadConfig.borderColor} hover:border-indigo-300`
+                }
+                ${prioridadConfig.bgColor}
+              `}
               onClick={() => {
                 console.log(`Card clicked for incidente ID: ${incidente.idIncidente}`);
                 handleSelectIncidente(incidente.idIncidente);
               }}
             >
-              <div className="flex flex-col h-full">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-sm font-semibold text-gray-800">
-                    {incidente.titulo || 'Incidente #' + incidente.idIncidente}
-                  </h3>
-                  <span
-                    className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      incidente.estado === 2
-                        ? 'bg-green-100 text-green-800'
-                        : incidente.estado === 1
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
+              {/* Indicador de prioridad */}
+              <div className={`absolute top-0 left-0 w-full h-1 ${prioridadConfig.accentColor} rounded-t-xl`}></div>
+              
+              <div className="p-6 flex flex-col h-full min-h-[380px]">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-5">
+                  <div className="flex-1 min-w-0 pr-4">
+                    <h3 className="text-base font-semibold text-gray-900 mb-1 truncate">
+                      {incidente.titulo || `Incidente #${incidente.idIncidente}`}
+                    </h3>
+                    <p className="text-sm text-gray-600 font-medium">
+                      ID: {incidente.idIncidente}
+                    </p>
+                  </div>
+                  <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium ${estadoConfig.bgColor} ${estadoConfig.textColor} border ${estadoConfig.borderColor} flex-shrink-0`}>
+                    <EstadoIcon size={12} />
+                    <span>{estadoConfig.text}</span>
+                  </div>
+                </div>
+
+                {/* Contenido principal */}
+                <div className="flex-1 space-y-4 text-sm text-gray-700">
+                  <div className="bg-white/60 rounded-lg p-4 space-y-2">
+                    <div className="flex items-start gap-3">
+                      <MapPin size={14} className="text-gray-500 mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-800">{incidente.area?.nombre?.toUpperCase() || 'ÁREA NO ESPECIFICADA'}</p>
+                        <p className="text-gray-600 text-sm">{formatUbicacion(incidente.activo)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-medium text-gray-800 mb-2">Activo:</p>
+                      <p className="text-gray-600 text-sm leading-relaxed">{formatActivo(incidente.activo)}</p>
+                    </div>
+
+                    {incidente.descripcion && (
+                      <div>
+                        <p className="font-medium text-gray-800 mb-2">Descripción:</p>
+                        <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">{incidente.descripcion}</p>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 gap-3 pt-3 border-t border-gray-200">
+                      <div className="flex items-center gap-3">
+                        <Clock size={14} className="text-gray-400" />
+                        <span className="text-gray-600 text-sm">{formatDate(incidente.fecha_reporte)}</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <User size={14} className="text-gray-400" />
+                        <span className="text-gray-600 text-sm">{formatTecnico(incidente.tecnico)}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500 text-sm">Prioridad:</span>
+                        <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${prioridadConfig.bgColor} ${prioridadConfig.textColor} border ${prioridadConfig.borderColor}`}>
+                          {prioridadConfig.text}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Bar */}
+                <div className="flex flex-col sm:flex-row gap-3 mt-auto pt-4 border-t border-gray-200">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditModal(incidente);
+                    }}
+                    className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-3 px-4 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex-1"
                   >
-                    {getEstadoText(incidente.estado)}
-                  </span>
+                    <Edit size={16} />
+                    <span>Editar</span>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openDetailsModal(incidente);
+                    }}
+                    className="flex items-center justify-center gap-2 bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium py-3 px-4 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 flex-1"
+                  >
+                    <Eye size={16} />
+                    <span>Detalles</span>
+                  </button>
                 </div>
-                <div className="text-xs text-gray-600 mb-2 flex-grow">
-                  <p><strong>Área:</strong> {incidente.area?.nombre?.toUpperCase() || '-'}</p>
-                  <p><strong>Activo:</strong> {formatActivo(incidente.activo)}</p>
-                  <p><strong>Descripción:</strong> {incidente.descripcion || '-'}</p>
-                  <p><strong>Fecha de Reporte:</strong> {formatDate(incidente.fecha_reporte)}</p>
-                  <p><strong>Prioridad:</strong> {getPrioridadText(incidente.prioridad)}</p>
-                  <p><strong>Técnico:</strong> {formatTecnico(incidente.tecnico)}</p>
-                </div>
-                <ActionBar
-                  incidente={incidente}
-                  openEditModal={openEditModal}
-                  openDetailsModal={openDetailsModal}
-                />
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 };
