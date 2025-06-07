@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchWithAuth } from '../../../../js/authToken';
 import API_BASE_URL from '../../../../js/urlHelper';
-import { Building, Package } from 'lucide-react';
+import { Building, Package, Lock } from 'lucide-react';
 
 const RegistroActivosAreas = () => {
   const [formData, setFormData] = useState({
@@ -30,17 +30,17 @@ const RegistroActivosAreas = () => {
           headers: { 'Content-Type': 'application/json' },
         });
         const result = await response.json();
-        console.log('Areas API response:', result); // Debug: Log the response
+        console.log('Areas API response:', result);
         if (result.success && Array.isArray(result.data)) {
           setAreas(result.data);
         } else {
-          setAreas([]); // Fallback to empty array
+          setAreas([]);
           console.error('Error fetching areas:', result.message || 'Invalid data format');
           showNotification('Error al cargar áreas', 'error');
         }
       } catch (error) {
         console.error('Error fetching areas:', error);
-        setAreas([]); // Fallback to empty array
+        setAreas([]);
         showNotification('Error al cargar áreas', 'error');
       } finally {
         setLoadingAreas(false);
@@ -50,22 +50,22 @@ const RegistroActivosAreas = () => {
     const fetchActivos = async () => {
       setLoadingActivos(true);
       try {
-        const response = await fetchWithAuth(`${API_BASE_URL}/api/activos`, {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/getactivos`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
         const result = await response.json();
-        console.log('Activos API response:', result); // Debug: Log the response
+        console.log('Activos API response:', result);
         if (result.success && Array.isArray(result.data)) {
           setActivos(result.data);
         } else {
-          setActivos([]); // Fallback to empty array
+          setActivos([]);
           console.error('Error fetching activos:', result.message || 'Invalid data format');
           showNotification('Error al cargar activos', 'error');
         }
       } catch (error) {
         console.error('Error fetching activos:', error);
-        setActivos([]); // Fallback to empty array
+        setActivos([]);
         showNotification('Error al cargar activos', 'error');
       } finally {
         setLoadingActivos(false);
@@ -117,6 +117,15 @@ const RegistroActivosAreas = () => {
           idArea: '',
           idActivo: '',
         });
+        // Refresh activos to update isAssigned
+        const activosResponse = await fetchWithAuth(`${API_BASE_URL}/api/getactivos`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const activosResult = await activosResponse.json();
+        if (activosResult.success && Array.isArray(activosResult.data)) {
+          setActivos(activosResult.data);
+        }
       } else {
         setErrors(result.errors || { general: result.message });
         showNotification(`Error: ${result.message}`, 'error');
@@ -207,8 +216,20 @@ const RegistroActivosAreas = () => {
                     <>
                       <option value="">SELECCIONE ACTIVO</option>
                       {activos.map((activo) => (
-                        <option key={activo.idActivo} value={activo.idActivo}>
-                          COD: {activo.codigo_inventario} - MARCA: {activo.marca_modelo} -  TIPO: {activo.tipo} 
+                        <option
+                          key={activo.idActivo}
+                          value={activo.idActivo}
+                          disabled={activo.isAssigned}
+                          className={activo.isAssigned ? 'text-gray-500 bg-gray-100' : ''}
+                        >
+                          {activo.isAssigned ? (
+                            <span>
+                              <Lock className="inline w-4 h-4 mr-1" />
+                              COD: {activo.codigo_inventario} - MARCA: {activo.marca_modelo} - TIPO: {activo.tipo} - Asignado a Area de: {activo.assigned_area?.nombre.toUpperCase()}
+                            </span>
+                          ) : (
+                            `COD: ${activo.codigo_inventario} - MARCA: ${activo.marca_modelo} - TIPO: ${activo.tipo}`
+                          )}
                         </option>
                       ))}
                     </>
@@ -223,9 +244,6 @@ const RegistroActivosAreas = () => {
               </div>
             </div>
           </div>
-          {errors.general && (
-            <div className="mt-4 text-red-500 text-center">{errors.general}</div>
-          )}
           <div className="mt-8 flex justify-center gap-4">
             <button
               type="submit"
@@ -244,7 +262,7 @@ const RegistroActivosAreas = () => {
             <button
               type="button"
               onClick={() => setFormData({ idArea: '', idActivo: '' })}
-              className="bg-gray-300 text-gray-800 font-bold py-4 px-12 rounded-lg shadow-lg hover:bg-gray-400"
+              className="bg-gray-300 text-gray-800 font-bold py-4 px-4 rounded-lg shadow-lg hover:bg-gray-400"
             >
               LIMPIAR
             </button>
