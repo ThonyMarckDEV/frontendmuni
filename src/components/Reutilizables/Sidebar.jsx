@@ -41,9 +41,9 @@ const Sidebar = () => {
           { icon: Home, label: 'Dashboard', path: '/admin' },
           {
             icon: Users,
-            label: 'Gestión y Usuarios',
+            label: 'Usuarios',
             subItems: [
-              { label: 'Usuarios', path: '/admin/registro-usuarios' },
+              { label: 'Registro', path: '/admin/registro-usuarios' },
               { label: 'Gestión', path: '/admin/gestion-usuarios' }
             ]
           },
@@ -51,24 +51,24 @@ const Sidebar = () => {
             icon: Monitor,
             label: 'Activos',
             subItems: [
-              { label: 'Activos', path: '/admin/registro-activos' },
-              { label: 'Gestión de Activos', path: '/admin/gestion-activos' },
+              { label: 'Registro', path: '/admin/registro-activos' },
+              { label: 'Gestión', path: '/admin/gestion-activos' },
             ]
           },
           {
             icon: MapPin,
             label: 'Áreas',
             subItems: [
-              { label: 'Áreas', path: '/admin/registro-areas' },
-              { label: 'Gestión de Áreas', path: '/admin/gestion-areas' },
+              { label: 'Registro', path: '/admin/registro-areas' },
+              { label: 'Gestión', path: '/admin/gestion-areas' },
             ]
           },
           {
             icon: Layers,
             label: 'Activos/Áreas',
             subItems: [
-              { label: 'Activos - Áreas', path: '/admin/registro-activos-areas' },
-              { label: 'Gestión de Activos-Áreas', path: '/admin/gestion-activos-areas' },
+              { label: 'Registro', path: '/admin/registro-activos-areas' },
+              { label: 'Gestión', path: '/admin/gestion-activos-areas' },
             ]
           },
           { icon: AlertTriangle, label: 'Incidentes', path: '/admin/incidentes' },
@@ -86,7 +86,7 @@ const Sidebar = () => {
             icon: AlertTriangle,
             label: 'Incidentes',
             subItems: [
-              { label: 'Incidentes', path: '/usuario/registro-incidentes' },
+              { label: 'Registro', path: '/usuario/registro-incidentes' },
               { label: 'Gestión', path: '/usuario/gestion-incidentes' }
             ]
           },
