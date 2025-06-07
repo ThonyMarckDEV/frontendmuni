@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchWithAuth } from '../../../js/authToken';
 import API_BASE_URL from '../../../js/urlHelper';
-import { AlertTriangle, Calendar } from 'lucide-react';
+import { AlertTriangle, Calendar, Building, Lock } from 'lucide-react';
 
 const IncidenteRegister = () => {
   const [formData, setFormData] = useState({
@@ -12,11 +12,34 @@ const IncidenteRegister = () => {
     prioridad: '0', // Default to Baja
   });
   const [activos, setActivos] = useState([]);
+  const [userArea, setUserArea] = useState(null);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [loadingActivos, setLoadingActivos] = useState(false);
+  const [loadingUserArea, setLoadingUserArea] = useState(false);
 
   useEffect(() => {
+    const fetchUserArea = async () => {
+      setLoadingUserArea(true);
+      try {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/userArea`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const result = await response.json();
+        if (result.success && result.data.datos && result.data.datos.area) {
+          setUserArea(result.data.datos.area);
+        } else {
+          setErrors((prev) => ({ ...prev, general: 'No se pudo cargar el área del usuario' }));
+        }
+      } catch (error) {
+        console.error('Error fetching user area:', error);
+        setErrors((prev) => ({ ...prev, general: 'Error al cargar el área del usuario' }));
+      } finally {
+        setLoadingUserArea(false);
+      }
+    };
+
     const fetchActivos = async () => {
       setLoadingActivos(true);
       try {
@@ -39,6 +62,7 @@ const IncidenteRegister = () => {
       }
     };
 
+    fetchUserArea();
     fetchActivos();
   }, []);
 
@@ -75,8 +99,7 @@ const IncidenteRegister = () => {
         titulo: formData.titulo || null,
         descripcion: formData.descripcion,
         fecha_reporte: formData.fecha_reporte,
-        prioridad: parseInt(formData.prioridad), // Include prioridad
-        estado: 0,
+        prioridad: parseInt(formData.prioridad),
       };
       const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes`, {
         method: 'POST',
@@ -119,14 +142,27 @@ const IncidenteRegister = () => {
                 DETALLES DEL INCIDENTE
               </h3>
               <div className="relative">
+                <Building className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-10 top-3 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={loadingUserArea ? 'Cargando...' : userArea ? userArea.nombre.toUpperCase() : 'Sin área asignada'}
+                  disabled
+                  className="w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
+                />
+                {errors.general && userArea === null && (
+                  <p className="text-red-500 text-sm mt-1">{errors.general}</p>
+                )}
+              </div>
+              <div className="relative">
                 <select
                   name="activo_id"
                   value={formData.activo_id}
                   onChange={handleInputChange}
-                  disabled={loadingActivos || activos.length === 0}
+                  disabled={loadingActivos || activos.length === 0 || loadingUserArea || !userArea}
                   className={`w-full pl-4 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-white ${
                     errors.activo_id ? 'border-red-500' : 'border-gray-300'
-                  } ${loadingActivos || activos.length === 0 ? 'cursor-not-allowed opacity-50' : ''}`}
+                  } ${loadingActivos || activos.length === 0 || loadingUserArea || !userArea ? 'cursor-not-allowed opacity-50' : ''}`}
                 >
                   {loadingActivos ? (
                     <option value="" disabled>
@@ -140,8 +176,8 @@ const IncidenteRegister = () => {
                     <>
                       <option value="">SELECCIONE ACTIVO</option>
                       {activos.map((activo) => (
-                        <option key={activo.id} value={activo.id}>
-                          {activo.codigo_inventario}
+                        <option key={activo.idActivo} value={activo.idActivo}>
+                           COD: {activo.codigo_inventario} - MARCA: {activo.marca_modelo} -  TIPO: {activo.tipo} 
                         </option>
                       ))}
                     </>
@@ -220,15 +256,15 @@ const IncidenteRegister = () => {
               </div>
             </div>
           </div>
-          {errors.general && (
+          {errors.general && !userArea && (
             <div className="mt-4 text-red-500 text-center">{errors.general}</div>
           )}
           <div className="mt-8 flex justify-center gap-4">
             <button
               type="submit"
-              disabled={loading || activos.length === 0}
+              disabled={loading || activos.length === 0 || loadingUserArea || !userArea}
               className={`bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-12 rounded-lg shadow-lg transform transition-all duration-200 hover:scale-105 ${
-                loading || activos.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                loading || activos.length === 0 || loadingUserArea || !userArea ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
               {loading ? (

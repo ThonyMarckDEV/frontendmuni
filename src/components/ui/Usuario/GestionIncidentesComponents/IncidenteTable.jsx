@@ -35,6 +35,9 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Área
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Activo
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -54,28 +57,29 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
         <tbody className="bg-white divide-y divide-gray-200">
           {loading ? (
             <tr key="loading-row">
-              <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+              <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
                 Cargando incidentes...
               </td>
             </tr>
           ) : incidentes.length === 0 ? (
             <tr key="no-incidentes-row">
-              <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+              <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
                 No se encontraron incidentes
               </td>
             </tr>
           ) : (
             incidentes.map((incidente) => (
               <tr
-                key={`incidente-row-${incidente.id}`}
+                key={`incidente-row-${incidente.idIncidente}`}
                 className={`hover:bg-gray-50 cursor-pointer ${
-                  selectedIncidentes.includes(incidente.id) ? 'bg-blue-100' : ''
+                  selectedIncidentes.includes(incidente.idIncidente) ? 'bg-blue-100' : ''
                 }`}
                 onClick={() => {
-                  console.log(`Row clicked for incidente ID: ${incidente.id}`);
-                  handleSelectIncidente(incidente.id);
+                  console.log(`Row clicked for incidente ID: ${incidente.idIncidente}`);
+                  handleSelectIncidente(incidente.idIncidente);
                 }}
               >
+                <td className="px-6 py-4 whitespace-nowrap">{incidente.area?.nombre?.toUpperCase() || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{incidente.activo?.codigo_inventario || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{incidente.descripcion || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{formatDate(incidente.fecha_reporte)}</td>

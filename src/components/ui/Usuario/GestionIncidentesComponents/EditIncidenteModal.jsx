@@ -26,10 +26,9 @@ const EditIncidenteModal = ({
     }
   };
 
-  // Formatear fecha_reporte para el input de tipo date
   const formatDateForInput = (date) => {
     try {
-      return new Date(date).toISOString().split('T')[0]; // Formato: yyyy-MM-dd
+      return new Date(date).toISOString().split('T')[0];
     } catch {
       return '';
     }
@@ -71,7 +70,7 @@ const EditIncidenteModal = ({
                     <>
                       <option value="">SELECCIONE ACTIVO</option>
                       {activos.map((activo) => (
-                        <option key={activo.id} value={activo.id}>
+                        <option key={activo.idActivo} value={activo.idActivo}>
                           {activo.codigo_inventario}
                         </option>
                       ))}

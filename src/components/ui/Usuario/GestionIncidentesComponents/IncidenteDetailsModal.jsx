@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { X, AlertTriangle, Calendar, Download } from 'lucide-react';
+import { X, AlertTriangle, Calendar, Download, Building } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { fetchWithAuth } from '../../../../js/authToken';
 import API_BASE_URL from '../../../../js/urlHelper';
-import FetchWithGif from '../../../../components/Reutilizables/FetchWithGif'; 
+import FetchWithGif from '../../../../components/Reutilizables/FetchWithGif';
 
 const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
-  const [isLoading, setIsLoading] = useState(false); // Estado para controlar el indicador de carga
+  const [isLoading, setIsLoading] = useState(false);
 
   const getEstadoText = (estado) => {
     switch (estado) {
-      case 0:
-        return 'Pendiente';
+      case 0: return 'Pendiente';
       case 1:
         return 'En progreso';
       case 2:
@@ -20,7 +19,7 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
       default:
         return '-';
     }
-  };
+  }
 
   const getPrioridadText = (prioridad) => {
     switch (prioridad) {
@@ -33,12 +32,12 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
       default:
         return '-';
     }
-  };
+  }
 
   const formatDate = (date) => {
     try {
-      return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: es });
-    } catch {
+      return format(new Date(date), 'dd/MM/yyyy hh:mm', { locale: es });
+    } catch (error) {
       return '-';
     }
   };
@@ -47,9 +46,9 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
   const prioridadText = getPrioridadText(incidente.prioridad);
 
   const handleDownloadPdf = async () => {
-    setIsLoading(true); // Mostrar el indicador de carga
+    setIsLoading(true);
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes/${incidente.id}/pdf`, {
+      const response = fetchWithAuth(`${API_BASE_URL}/api/incidentes/${incidente.idIncidente}/pdf`, {
         method: 'GET',
         headers: {
           'Accept': 'application/pdf',
@@ -64,7 +63,7 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `incidente_${incidente.id}.pdf`;
+      a.download = `incidente_${incidente.idIncidente}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -73,7 +72,7 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
       console.error('Error downloading PDF:', error);
       alert('Error al descargar el PDF');
     } finally {
-      setIsLoading(false); // Ocultar el indicador de carga
+      setIsLoading(false);
     }
   };
 
@@ -98,6 +97,11 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
                   DETALLES DEL INCIDENTE
                 </h3>
                 <div className="flex items-center gap-2">
+                  <Building className="w-5 h-5 text-gray-400" />
+                  <span className="font-medium">Área:</span>
+                  {incidente.area?.nombre?.toUpperCase() || '-'}
+                </div>
+                <div className="flex items-center gap-2">
                   <span className="font-medium">Activo:</span>
                   {incidente.activo?.codigo_inventario || '-'}
                 </div>
@@ -115,7 +119,7 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
                         ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-green-100 text-green-800'
                     }`}
-                  >
+                    >
                     {prioridadText}
                   </span>
                 </div>
@@ -139,7 +143,7 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
                         ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-red-100 text-red-800'
                     }`}
-                  >
+                    >
                     {estadoText}
                   </span>
                 </div>
@@ -148,18 +152,18 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
             <div className="mt-8 flex justify-center gap-4">
               <button
                 onClick={handleDownloadPdf}
-                disabled={isLoading} // Deshabilitar el botón mientras se carga
-                className={`bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-12 rounded-lg shadow-lg transform transition-all duration-200 hover:scale-105 flex items-center gap-2 ${
+                disabled={isLoading}
+                className={`bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-12 rounded-lg shadow-lg transform transition-all duration-200 flex items-center gap-2 ${
                   isLoading ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
-              >
+                >
                 <Download className="w-5 h-5" />
                 DESCARGAR PDF
               </button>
               <button
                 onClick={() => setDetailsModalOpen(false)}
                 className="bg-gray-300 text-gray-800 font-bold py-4 px-12 rounded-lg shadow-lg hover:bg-gray-400"
-              >
+                >
                 CERRAR
               </button>
             </div>

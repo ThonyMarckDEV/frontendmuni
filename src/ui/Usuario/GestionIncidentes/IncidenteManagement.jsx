@@ -19,7 +19,7 @@ const IncidenteManagement = () => {
     activo_id: '',
     descripcion: '',
     fecha_reporte: '',
-    prioridad: '0', // Default to Baja
+    prioridad: '0',
   });
   const [errors, setErrors] = useState({});
 
@@ -80,10 +80,10 @@ const IncidenteManagement = () => {
   const openEditModal = (incidente) => {
     setCurrentIncidente(incidente);
     setFormData({
-      activo_id: incidente.activo_id || '',
+      activo_id: incidente.activo?.idActivo || '',
       descripcion: incidente.descripcion || '',
       fecha_reporte: incidente.fecha_reporte || '',
-      prioridad: String(incidente.prioridad) || '0', // Ensure string for form
+      prioridad: String(incidente.prioridad) || '0',
     });
     setEditModalOpen(true);
   };
@@ -120,7 +120,7 @@ const IncidenteManagement = () => {
         />
         {selectedIncidentes.length === 1 && (
           <ActionBar
-            incidente={incidentes.find((incidente) => incidente.id === selectedIncidentes[0])}
+            incidente={incidentes.find((incidente) => incidente.idIncidente === selectedIncidentes[0])}
             openEditModal={openEditModal}
             openDetailsModal={openDetailsModal}
           />
@@ -150,9 +150,9 @@ const IncidenteManagement = () => {
                   activo_id: parseInt(formData.activo_id),
                   descripcion: formData.descripcion,
                   fecha_reporte: formData.fecha_reporte,
-                  prioridad: parseInt(formData.prioridad), // Include prioridad
+                  prioridad: parseInt(formData.prioridad),
                 };
-                const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes/${currentIncidente.id}`, {
+                const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes/${currentIncidente.idIncidente}`, {
                   method: 'PUT',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(payload),
@@ -162,7 +162,7 @@ const IncidenteManagement = () => {
                   alert('Incidente actualizado exitosamente');
                   setIncidentes((prev) =>
                     prev.map((incidente) =>
-                      incidente.id === currentIncidente.id ? { ...incidente, ...result.data } : incidente
+                      incidente.idIncidente === currentIncidente.idIncidente ? { ...incidente, ...result.data } : incidente
                     )
                   );
                   closeEditModal();
