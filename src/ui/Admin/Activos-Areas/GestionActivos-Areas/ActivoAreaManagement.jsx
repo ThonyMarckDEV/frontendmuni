@@ -26,6 +26,7 @@ const ActivoAreaManagement = () => {
     idArea: '',
   });
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false); // Prevent multiple submissions
   const actionBarRef = useRef(null);
 
   const fetchAssignedActivos = async () => {
@@ -43,18 +44,23 @@ const ActivoAreaManagement = () => {
       if (result.success && Array.isArray(result.data)) {
         const normalizedData = result.data.map((item, index) => ({
           ...item,
-          id: item.idActivoArea || `temp-${index}`, // Use idActivoArea as primary ID
+          id: item.idActivoArea || `temp-${index}`,
         }));
         setAssignedActivos(normalizedData);
       } else {
         setAssignedActivos([]);
         console.error('Error fetching assigned activos:', result.message || 'Invalid data format');
-        toast.error('Error al cargar activos asignados');
+        // Avoid duplicate toasts by checking toast.isActive
+        if (!toast.isActive('fetch-error')) {
+          toast.error('Error al cargar activos asignados', { toastId: 'fetch-error' });
+        }
       }
     } catch (error) {
       console.error('Error fetching assigned activos:', error.message);
       setAssignedActivos([]);
-      toast.error('Error al cargar activos asignados');
+      if (!toast.isActive('fetch-error')) {
+        toast.error('Error al cargar activos asignados', { toastId: 'fetch-error' });
+      }
     } finally {
       setLoadingAssigned(false);
     }
@@ -75,12 +81,16 @@ const ActivoAreaManagement = () => {
         } else {
           setAreas([]);
           console.error('Error fetching areas:', result.message || 'Invalid data format');
-          toast.error('Error al cargar áreas');
+          if (!toast.isActive('areas-error')) {
+            toast.error('Error al cargar áreas', { toastId: 'areas-error' });
+          }
         }
       } catch (error) {
         console.error('Error fetching areas:', error.message);
         setAreas([]);
-        toast.error('Error al cargar áreas');
+        if (!toast.isActive('areas-error')) {
+          toast.error('Error al cargar áreas', { toastId: 'areas-error' });
+        }
       } finally {
         setLoadingAreas(false);
       }
@@ -100,12 +110,16 @@ const ActivoAreaManagement = () => {
         } else {
           setActivos([]);
           console.error('Error fetching activos:', result.message || 'Invalid data format');
-          toast.error('Error al cargar activos');
+          if (!toast.isActive('activos-error')) {
+            toast.error('Error al cargar activos', { toastId: 'activos-error' });
+          }
         }
       } catch (error) {
         console.error('Error fetching activos:', error.message);
         setActivos([]);
-        toast.error('Error al cargar activos');
+        if (!toast.isActive('activos-error')) {
+          toast.error('Error al cargar activos', { toastId: 'activos-error' });
+        }
       } finally {
         setLoadingActivos(false);
       }
@@ -173,18 +187,24 @@ const ActivoAreaManagement = () => {
       });
       const result = await response.json();
       if (result.success) {
-        toast.success('Asignación eliminada exitosamente');
+        if (!toast.isActive('delete-success')) {
+          toast.success('Asignación eliminada exitosamente', { toastId: 'delete-success' });
+        }
         setAssignedActivos(assignedActivos.filter((aa) => aa.idActivoArea !== activoAreaToDelete));
         setSelectedActivoArea(null);
         if (selectedArea) {
           await fetchAssignedActivos();
         }
       } else {
-        toast.error(`Error: ${result.message}`);
+        if (!toast.isActive('delete-error')) {
+          toast.error(`Error: ${result.message}`, { toastId: 'delete-error' });
+        }
       }
     } catch (error) {
       console.error('Error:', error.message);
-      toast.error('Error al eliminar asignación');
+      if (!toast.isActive('delete-error')) {
+        toast.error('Error al eliminar asignación', { toastId: 'delete-error' });
+      }
     } finally {
       setConfirmDeleteOpen(false);
       setActivoAreaToDelete(null);
@@ -198,7 +218,19 @@ const ActivoAreaManagement = () => {
 
   return (
     <div className="min-h-screen py-8 px-4 bg-gray-50">
-      <ToastContainer />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        limit={1}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -245,6 +277,8 @@ const ActivoAreaManagement = () => {
             activoAreaId={selectedActivoArea}
             handleEditSubmit={async (e, activoAreaId) => {
               e.preventDefault();
+              if (isSubmitting) return; // Prevent multiple submissions
+              setIsSubmitting(true);
               const validateForm = () => {
                 const newErrors = {};
                 if (!formData.idActivo) newErrors.idActivo = 'Debe seleccionar un activo';
@@ -252,9 +286,15 @@ const ActivoAreaManagement = () => {
                 setErrors(newErrors);
                 return Object.keys(newErrors).length === 0;
               };
-              if (!validateForm()) return;
+              if (!validateForm()) {
+                setIsSubmitting(false);
+                return;
+              }
               if (!activoAreaId) {
-                toast.error('Error: No se seleccionó un activo válido');
+                if (!toast.isActive('edit-error')) {
+                  toast.error('Error: No se seleccionó un activo válido', { toastId: 'edit-error' });
+                }
+                setIsSubmitting(false);
                 return;
               }
               try {
@@ -287,14 +327,22 @@ const ActivoAreaManagement = () => {
                     await fetchAssignedActivos();
                   }
                   closeEditModal();
-                  toast.success('Asignación actualizada exitosamente');
+                  if (!toast.isActive('edit-success')) {
+                    toast.success('Asignación actualizada exitosamente', { toastId: 'edit-success' });
+                  }
                 } else {
                   setErrors(result.errors || { general: result.message });
-                  toast.error(`Error: ${result.message}`);
+                  if (!toast.isActive('edit-error')) {
+                    toast.error(`Error: ${result.message}`, { toastId: 'edit-error' });
+                  }
                 }
               } catch (error) {
                 console.error('Error:', error.message);
-                toast.error('Error al actualizar asignación');
+                if (!toast.isActive('edit-error')) {
+                  toast.error('Error al actualizar asignación', { toastId: 'edit-error' });
+                }
+              } finally {
+                setIsSubmitting(false);
               }
             }}
             setEditModalOpen={setEditModalOpen}
