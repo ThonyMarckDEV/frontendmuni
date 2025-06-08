@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Lock, Mail, Phone, CreditCard, Building, Users } from 'lucide-react';
 import { fetchWithAuth } from '../../../../js/authToken';
 import API_BASE_URL from '../../../../js/urlHelper';
+import { toast } from 'react-toastify';
 
 const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
   const [formData, setFormData] = useState({
@@ -40,9 +41,11 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
           setRoles(result.data);
         } else {
           console.error('Error fetching roles:', result.message);
+          toast.error('Error fetching roles:', result.message);
         }
       } catch (error) {
         console.error('Error fetching roles:', error);
+        toast.error('Error fetching roles:', error);
       } finally {
         setLoadingRoles(false);
       }
@@ -60,9 +63,11 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
           setAreas(result.data);
         } else {
           console.error('Error fetching areas:', result.message);
+          toast.error('Error fetching areas:', result.message);
         }
       } catch (error) {
         console.error('Error fetching areas:', error);
+        toast.error('Error fetching areas:', error);
       } finally {
         setLoadingAreas(false);
       }
@@ -97,9 +102,11 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
             setIsTecnico(user.idRol === 3);
           } else {
             console.error('Error fetching user:', result.message);
+            toast.error('Error fetching user:', result.message);
           }
         } catch (error) {
           console.error('Error fetching user:', error);
+          toast.error('Error fetching user:', error);
         }
       };
       fetchUser();
@@ -187,7 +194,7 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
       const result = await response.json();
 
       if (result.success) {
-        alert(isUpdating ? 'Usuario actualizado exitosamente' : 'Usuario registrado exitosamente');
+        toast.success(isUpdating ? 'Usuario actualizado exitosamente' : 'Usuario registrado exitosamente');
         onSuccess();
 
         if (!isUpdating) {
@@ -208,11 +215,11 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
         }
       } else {
         setErrors(result.errors || { general: result.message });
-        alert(`Error: ${result.message}`);
+        toast.error(`Error: ${result.message}`);
       }
     } catch (error) {
       console.error('Error:', error.message);
-      alert(isUpdating ? 'Error al actualizar usuario' : 'Error al registrar usuario');
+      toast.error(isUpdating ? 'Error al actualizar usuario' : 'Error al registrar usuario');
     } finally {
       setLoading(false);
     }

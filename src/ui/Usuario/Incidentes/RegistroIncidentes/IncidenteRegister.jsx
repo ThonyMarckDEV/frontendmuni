@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchWithAuth } from '../../../../js/authToken';
 import API_BASE_URL from '../../../../js/urlHelper';
 import { AlertTriangle, Calendar, Building, Lock } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const IncidenteRegister = () => {
   const [formData, setFormData] = useState({
@@ -31,10 +32,12 @@ const IncidenteRegister = () => {
           setUserArea(result.data.datos.area);
         } else {
           setErrors((prev) => ({ ...prev, general: 'No se pudo cargar el área del usuario' }));
+          toast.error('No se pudo cargar el área del usuario');
         }
       } catch (error) {
         console.error('Error fetching user area:', error);
         setErrors((prev) => ({ ...prev, general: 'Error al cargar el área del usuario' }));
+        toast.error('Error al cargar el área del usuario', error);
       } finally {
         setLoadingUserArea(false);
       }
@@ -53,10 +56,12 @@ const IncidenteRegister = () => {
         } else {
           console.error('Error fetching activos:', result.message);
           setErrors((prev) => ({ ...prev, general: result.message }));
+          toast.error('Error fetching activos:', result.message);
         }
       } catch (error) {
         console.error('Error fetching activos:', error);
         setErrors((prev) => ({ ...prev, general: 'Error al cargar los activos' }));
+        toast.error('Error fetching activos:', error);
       } finally {
         setLoadingActivos(false);
       }
@@ -108,7 +113,7 @@ const IncidenteRegister = () => {
       });
       const result = await response.json();
       if (result.success) {
-        alert('Incidente registrado exitosamente');
+        toast.success('Incidente registrado exitosamente');
         setFormData({
           idActivo: '',
           titulo: '',
@@ -118,11 +123,11 @@ const IncidenteRegister = () => {
         });
       } else {
         setErrors(result.errors || { general: result.message });
-        alert(`Error: ${result.message}`);
+        toast.error(`Error: ${result.message}`);
       }
     } catch (error) {
       console.error('Error:', error.message);
-      alert('Error al registrar incidente');
+      toast.error('Error al registrar incidente');
     } finally {
       setLoading(false);
     }

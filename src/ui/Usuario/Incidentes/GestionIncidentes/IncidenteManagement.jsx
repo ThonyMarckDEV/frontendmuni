@@ -4,6 +4,7 @@ import API_BASE_URL from '../../../../js/urlHelper';
 import IncidenteTable from '../../../../components/ui/Usuario/GestionIncidentesComponents/IncidenteTable';
 import EditIncidenteModal from '../../../../components/ui/Usuario/GestionIncidentesComponents/EditIncidenteModal';
 import IncidenteDetailsModal from '../../../../components/ui/Usuario/GestionIncidentesComponents/IncidenteDetailsModal';
+import { toast } from 'react-toastify';
 
 const IncidenteManagement = () => {
   const [incidentes, setIncidentes] = useState([]);
@@ -35,9 +36,11 @@ const IncidenteManagement = () => {
           setIncidentes(result.data.data);
         } else {
           console.error('Error fetching incidentes:', result.message);
+          toast.error('Error fetching incidentes:', result.message);
         }
       } catch (error) {
         console.error('Error fetching incidentes:', error);
+        toast.error('Error fetching incidentes:', error);
       } finally {
         setLoading(false);
       }
@@ -55,9 +58,11 @@ const IncidenteManagement = () => {
           setActivos(result.data);
         } else {
           console.error('Error fetching activos:', result.message);
+          toast.error('Error fetching activos:', result.message);
         }
       } catch (error) {
         console.error('Error fetching activos:', error);
+        toast.error('Error fetching activos:', error);
       } finally {
         setLoadingActivos(false);
       }
@@ -153,7 +158,7 @@ const IncidenteManagement = () => {
                 });
                 const result = await response.json();
                 if (result.success) {
-                  alert('Incidente actualizado exitosamente');
+                  toast.success('Incidente actualizado exitosamente');
                   setIncidentes((prev) =>
                     prev.map((incidente) =>
                       incidente.idIncidente === currentIncidente.idIncidente ? { ...incidente, ...result.data } : incidente
@@ -162,11 +167,11 @@ const IncidenteManagement = () => {
                   closeEditModal();
                 } else {
                   setErrors(result.errors || { general: result.message });
-                  alert(`Error: ${result.message}`);
+                  toast.error(`Error: ${result.message}`);
                 }
               } catch (error) {
                 console.error('Error:', error.message);
-                alert('Error al actualizar incidente');
+                toast.error('Error al actualizar incidente');
               } finally {
                 setLoading(false);
               }

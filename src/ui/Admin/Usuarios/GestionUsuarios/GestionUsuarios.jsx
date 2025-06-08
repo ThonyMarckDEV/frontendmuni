@@ -6,6 +6,7 @@ import UserTable from '../../../../components/ui/Admin/GestionUsuariosComponents
 import ActionBar from '../../../../components/ui/Admin/GestionUsuariosComponents/ActionBar';
 import EditUserModal from '../../../../components/ui/Admin/GestionUsuariosComponents/EditUserModal';
 import UserDetailsModal from '../../../../components/ui/Admin/GestionUsuariosComponents/UserDetailsModal';
+import { toast } from 'react-toastify';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -47,9 +48,11 @@ const UserManagement = () => {
           setRoles(result.data);
         } else {
           console.error('Error fetching roles:', result.message);
+          toast.error('Error fetching roles:', result.message);
         }
       } catch (error) {
         console.error('Error fetching roles:', error);
+        toast.error('Error fetching roles:', error);
       } finally {
         setLoadingRoles(false);
       }
@@ -67,9 +70,11 @@ const UserManagement = () => {
           setAreas(result.data);
         } else {
           console.error('Error fetching areas:', result.message);
+          toast.error('Error fetching areas:', result.message);
         }
       } catch (error) {
         console.error('Error fetching areas:', error);
+        toast.error('Error fetching areas:', error);
       } finally {
         setLoadingAreas(false);
       }
@@ -87,9 +92,11 @@ const UserManagement = () => {
           setUsers(result.data.data);
         } else {
           console.error('Error fetching users:', result.message);
+          toast.error('Error fetching users:', result.message);
         }
       } catch (error) {
         console.error('Error fetching users:', error);
+         toast.error('Error fetching users:', error);
       } finally {
         setLoading(false);
       }
@@ -239,7 +246,7 @@ const UserManagement = () => {
                 });
                 const result = await response.json();
                 if (result.success) {
-                  alert('Usuario actualizado exitosamente');
+                  toast.success('Usuario actualizado exitosamente');
                   setUsers((prev) =>
                     prev.map((user) =>
                       user.idUsuario === currentUser.idUsuario
@@ -250,11 +257,11 @@ const UserManagement = () => {
                   closeEditModal();
                 } else {
                   setErrors(result.errors || { general: result.message });
-                  alert(`Error: ${result.message}`);
+                  toast.error(`Error: ${result.message}`);
                 }
               } catch (error) {
                 console.error('Error:', error.message);
-                alert('Error al actualizar usuario');
+                toast.error('Error al actualizar usuario');
               } finally {
                 setLoading(false);
               }

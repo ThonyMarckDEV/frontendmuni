@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchWithAuth } from '../../../../js/authToken';
 import API_BASE_URL from '../../../../js/urlHelper';
 import { Building, Package, Lock } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const RegistroActivosAreas = () => {
   const [formData, setFormData] = useState({
@@ -14,12 +15,6 @@ const RegistroActivosAreas = () => {
   const [loadingActivos, setLoadingActivos] = useState(true);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
-
-  const showNotification = (message, type = 'success') => {
-    setNotification({ show: true, message, type });
-    setTimeout(() => setNotification({ show: false, message: '', type: 'success' }), 3000);
-  };
 
   useEffect(() => {
     const fetchAreas = async () => {
@@ -36,12 +31,12 @@ const RegistroActivosAreas = () => {
         } else {
           setAreas([]);
           console.error('Error fetching areas:', result.message || 'Invalid data format');
-          showNotification('Error al cargar áreas', 'error');
+          toast.error('Error al cargar áreas', 'error');
         }
       } catch (error) {
         console.error('Error fetching areas:', error);
         setAreas([]);
-        showNotification('Error al cargar áreas', 'error');
+        toast.error('Error al cargar áreas', 'error');
       } finally {
         setLoadingAreas(false);
       }
@@ -61,12 +56,12 @@ const RegistroActivosAreas = () => {
         } else {
           setActivos([]);
           console.error('Error fetching activos:', result.message || 'Invalid data format');
-          showNotification('Error al cargar activos', 'error');
+          toast.error('Error al cargar activos', 'error');
         }
       } catch (error) {
         console.error('Error fetching activos:', error);
         setActivos([]);
-        showNotification('Error al cargar activos', 'error');
+        toast.error('Error al cargar activos', 'error');
       } finally {
         setLoadingActivos(false);
       }
@@ -112,7 +107,7 @@ const RegistroActivosAreas = () => {
       });
       const result = await response.json();
       if (result.success) {
-        showNotification('Asignación registrada exitosamente');
+        toast.success('Asignación registrada exitosamente');
         setFormData({
           idArea: '',
           idActivo: '',
@@ -128,11 +123,11 @@ const RegistroActivosAreas = () => {
         }
       } else {
         setErrors(result.errors || { general: result.message });
-        showNotification(`Error: ${result.message}`, 'error');
+        toast.error(`Error: ${result.message}`, 'error');
       }
     } catch (error) {
       console.error('Error:', error.message);
-      showNotification('Error al registrar asignación', 'error');
+      toast.error('Error al registrar asignación', 'error');
     } finally {
       setLoading(false);
     }
@@ -267,15 +262,6 @@ const RegistroActivosAreas = () => {
               LIMPIAR
             </button>
           </div>
-          {notification.show && (
-            <div
-              className={`fixed top-4 right-4 ${
-                notification.type === 'success' ? 'bg-green-600' : 'bg-red-600'
-              } text-white px-4 py-2 rounded-lg shadow-lg z-50`}
-            >
-              {notification.message}
-            </div>
-          )}
         </form>
       </div>
     </div>

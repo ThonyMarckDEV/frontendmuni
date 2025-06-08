@@ -6,6 +6,7 @@ import AreaTable from '../../../../components/ui/Admin/GestionAreasComponents/Ar
 import ActionBar from '../../../../components/ui/Admin/GestionAreasComponents/ActionBar';
 import EditAreaModal from '../../../../components/ui/Admin/GestionAreasComponents/EditAreaModal';
 import AreaDetailsModal from '../../../../components/ui/Admin/GestionAreasComponents/AreaDetailsModal';
+import { toast } from 'react-toastify';
 
 const AreaManagement = () => {
   const [areas, setAreas] = useState([]);
@@ -33,9 +34,11 @@ const AreaManagement = () => {
           setAreas(result.data);
         } else {
           console.error('Error fetching areas:', result.message);
+          toast.error('Error fetching areas:', result.message);
         }
       } catch (error) {
         console.error('Error fetching areas:', error);
+        toast.error('Error fetching areas:', error);
       } finally {
         setLoading(false);
       }
@@ -140,7 +143,7 @@ const AreaManagement = () => {
                 });
                 const result = await response.json();
                 if (result.success) {
-                  alert('Área actualizada exitosamente');
+                  toast.success('Área actualizada exitosamente');
                   setAreas((prev) =>
                     prev.map((area) =>
                       area.idArea === currentArea.idArea ? { ...area, ...result.data } : area
@@ -149,11 +152,11 @@ const AreaManagement = () => {
                   closeEditModal();
                 } else {
                   setErrors(result.errors || { general: result.message });
-                  alert(`Error: ${result.message}`);
+                  toast.error(`Error: ${result.message}`);
                 }
               } catch (error) {
                 console.error('Error:', error.message);
-                alert('Error al actualizar área');
+                toast.error('Error al actualizar área');
               } finally {
                 setLoading(false);
               }

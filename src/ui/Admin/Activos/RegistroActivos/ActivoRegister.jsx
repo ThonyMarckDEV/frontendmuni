@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { fetchWithAuth } from '../../../../js/authToken';
 import API_BASE_URL from '../../../../js/urlHelper';
 import { Server, MapPin, Tag } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const ActivoRegister = () => {
   const [formData, setFormData] = useState({
@@ -52,7 +53,7 @@ const ActivoRegister = () => {
       });
       const result = await response.json();
       if (result.success) {
-        alert('Activo registrado exitosamente');
+        toast.success('Activo registrado exitosamente');
         setFormData({
           codigo_inventario: '',
           ubicacion: '',
@@ -62,11 +63,11 @@ const ActivoRegister = () => {
         });
       } else {
         setErrors(result.errors || { general: result.message });
-        alert(`Error: ${result.message}`);
+        toast.error(`Error: ${result.message}`);
       }
     } catch (error) {
       console.error('Error:', error.message);
-      alert('Error al registrar activo');
+      toast.error('Error al registrar activo');
     } finally {
       setLoading(false);
     }

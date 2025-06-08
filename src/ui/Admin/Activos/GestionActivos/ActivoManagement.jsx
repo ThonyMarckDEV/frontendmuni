@@ -5,6 +5,7 @@ import ActivoTable from '../../../../components/ui/Admin/GestionActivosComponent
 import ActionBar from '../../../../components/ui/Admin/GestionActivosComponents/ActionBar';
 import EditActivoModal from '../../../../components/ui/Admin/GestionActivosComponents/EditActivoModal';
 import ActivoDetailsModal from '../../../../components/ui/Admin/GestionActivosComponents/ActivoDetailsModal';
+import { toast } from 'react-toastify';
 
 const ActivoManagement = () => {
   const [activos, setActivos] = useState([]);
@@ -42,12 +43,12 @@ const ActivoManagement = () => {
         } else {
           setActivos([]);
           console.error('Error fetching activos:', result.message || 'Invalid data format');
-          alert('Error al cargar activos');
+          toast.error('Error al cargar activos');
         }
       } catch (error) {
         console.error('Error fetching activos:', error.message);
         setActivos([]);
-        alert('Error al cargar activos');
+        toast.error('Error al cargar activos');
       } finally {
         setLoading(false);
       }
@@ -145,7 +146,7 @@ const ActivoManagement = () => {
                 });
                 const result = await response.json();
                 if (result.success) {
-                  alert('Activo actualizado exitosamente');
+                  toast.success('Activo actualizado exitosamente');
                   setActivos((prev) =>
                     prev.map((activo) =>
                       (activo.id || activo.idActivo) === (currentActivo.id || currentActivo.idActivo) ? { ...activo, ...result.data, id: result.data.idActivo } : activo
@@ -154,11 +155,11 @@ const ActivoManagement = () => {
                   closeEditModal();
                 } else {
                   setErrors(result.errors || { general: result.message });
-                  alert(`Error: ${result.message}`);
+                  toast.error(`Error: ${result.message}`);
                 }
               } catch (error) {
                 console.error('Error:', error.message);
-                alert('Error al actualizar activo');
+                toast.error('Error al actualizar activo');
               } finally {
                 setLoading(false);
               }

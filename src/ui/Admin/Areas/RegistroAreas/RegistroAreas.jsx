@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Building, Edit } from 'lucide-react';
 import { fetchWithAuth } from '../../../../js/authToken';
 import API_BASE_URL from '../../../../js/urlHelper';
+import { toast } from 'react-toastify';
 
 const RegistroAreas = ({ areaId = null, onSuccess = () => {} }) => {
   const [formData, setFormData] = useState({
@@ -27,9 +28,11 @@ const RegistroAreas = ({ areaId = null, onSuccess = () => {} }) => {
             });
           } else {
             console.error('Error fetching area:', result.message);
+            toast.error('Error fetching area:', result.message);
           }
         } catch (error) {
           console.error('Error fetching area:', error);
+          toast.error('Error fetching area:', error);
         }
       };
       fetchArea();
@@ -89,7 +92,7 @@ const RegistroAreas = ({ areaId = null, onSuccess = () => {} }) => {
       const result = await response.json();
 
       if (result.success) {
-        alert(isUpdating ? 'Área actualizada exitosamente' : 'Área registrada exitosamente');
+        toast.success(isUpdating ? 'Área actualizada exitosamente' : 'Área registrada exitosamente');
         onSuccess();
 
         if (!isUpdating) {
@@ -97,11 +100,11 @@ const RegistroAreas = ({ areaId = null, onSuccess = () => {} }) => {
         }
       } else {
         setErrors(result.errors || { general: result.message });
-        alert(`Error: ${result.message}`);
+        toast.error(`Error: ${result.message}`);
       }
     } catch (error) {
       console.error('Error:', error.message);
-      alert(isUpdating ? 'Error al actualizar área' : 'Error al registrar área');
+      toast.error(isUpdating ? 'Error al actualizar área' : 'Error al registrar área');
     } finally {
       setLoading(false);
     }
