@@ -6,6 +6,7 @@ import ActivoAreaTable from '../../../../components/ui/Admin/GestionActivos-Area
 import ActionBar from '../../../../components/ui/Admin/GestionActivos-AreasComponents/ActionBar';
 import EditActivoAreaModal from '../../../../components/ui/Admin/GestionActivos-AreasComponents/EditActivoAreaModal';
 import { X } from 'lucide-react';
+import { toast, ToastContainer } from 'react-toastify';
 
 const ActivoAreaManagement = () => {
   const [areas, setAreas] = useState([]);
@@ -19,19 +20,13 @@ const ActivoAreaManagement = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [activoAreaToDelete, setActivoAreaToDelete] = useState(null);
-  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
   const [formData, setFormData] = useState({
     idActivo: '',
     idArea: '',
   });
   const [errors, setErrors] = useState({});
   const actionBarRef = useRef(null);
-
-  const showNotification = (message, type = 'success') => {
-    setNotification({ show: true, message, type });
-    setTimeout(() => setNotification({ show: false, message: '', type: 'success' }), 3000);
-  };
-
+  
   const fetchAssignedActivos = async () => {
     setLoadingAssigned(true);
     if (!editModalOpen) {
@@ -53,12 +48,12 @@ const ActivoAreaManagement = () => {
       } else {
         setAssignedActivos([]);
         console.error('Error fetching assigned activos:', result.message || 'Invalid data format');
-        showNotification('Error al cargar activos asignados', 'error');
+        toast.error('Error al cargar activos asignados', 'error');
       }
     } catch (error) {
       console.error('Error fetching assigned activos:', error.message);
       setAssignedActivos([]);
-      showNotification('Error al cargar activos asignados', 'error');
+      toast.error('Error al cargar activos asignados', 'error');
     } finally {
       setLoadingAssigned(false);
     }
@@ -79,12 +74,12 @@ const ActivoAreaManagement = () => {
         } else {
           setAreas([]);
           console.error('Error fetching areas:', result.message || 'Invalid data format');
-          showNotification('Error al cargar áreas', 'error');
+           toast.error('Error al cargar áreas', 'error');
         }
       } catch (error) {
         console.error('Error fetching areas:', error.message);
         setAreas([]);
-        showNotification('Error al cargar áreas', 'error');
+         toast.error('Error al cargar áreas', 'error');
       } finally {
         setLoadingAreas(false);
       }
@@ -104,12 +99,12 @@ const ActivoAreaManagement = () => {
         } else {
           setActivos([]);
           console.error('Error fetching activos:', result.message || 'Invalid data format');
-          showNotification('Error al cargar activos', 'error');
+          toast.error('Error al cargar activos', 'error');
         }
       } catch (error) {
         console.error('Error fetching activos:', error.message);
         setActivos([]);
-        showNotification('Error al cargar activos', 'error');
+         toast.error('Error al cargar activos', 'error');
       } finally {
         setLoadingActivos(false);
       }
@@ -177,18 +172,18 @@ const ActivoAreaManagement = () => {
       });
       const result = await response.json();
       if (result.success) {
-        showNotification('Asignación eliminada exitosamente');
+        toast.success('Asignación eliminada exitosamente');
         setAssignedActivos(assignedActivos.filter((aa) => (aa.id || aa.idActivoArea) !== activoAreaToDelete));
         setSelectedActivoArea(null);
         if (selectedArea) {
           await fetchAssignedActivos();
         }
       } else {
-        showNotification(`Error: ${result.message}`, 'error');
+        toast.error(`Error: ${result.message}`, 'error');
       }
     } catch (error) {
       console.error('Error:', error.message);
-      showNotification('Error al eliminar asignación', 'error');
+       toast.error('Error al eliminar asignación', 'error');
     } finally {
       setConfirmDeleteOpen(false);
       setActivoAreaToDelete(null);
@@ -257,7 +252,7 @@ const ActivoAreaManagement = () => {
               };
               if (!validateForm()) return;
               if (!activoAreaId) {
-                showNotification('Error: No se seleccionó un activo válido', 'error');
+                 toast.error('Error: No se seleccionó un activo válido', 'error');
                 return;
               }
               try {
@@ -271,7 +266,7 @@ const ActivoAreaManagement = () => {
                 );
                 const result = await response.json();
                 if (result.success) {
-                  showNotification('Asignación actualizada exitosamente');
+                  toast.success('Asignación actualizada exitosamente');
                   const updatedActivo = {
                     ...result.data,
                     id: result.data.id || result.data.idActivoArea,
@@ -292,11 +287,11 @@ const ActivoAreaManagement = () => {
                   closeEditModal();
                 } else {
                   setErrors(result.errors || { general: result.message });
-                  showNotification(`Error: ${result.message}`, 'error');
+                   toast.error(`Error: ${result.message}`, 'error');
                 }
               } catch (error) {
                 console.error('Error:', error.message);
-                showNotification('Error al actualizar asignación', 'error');
+                 toast.error('Error al actualizar asignación', 'error');
               }
             }}
             setEditModalOpen={setEditModalOpen}
@@ -332,15 +327,6 @@ const ActivoAreaManagement = () => {
                 </button>
               </div>
             </div>
-          </div>
-        )}
-        {notification.show && (
-          <div
-            className={`fixed top-4 right-4 ${
-              notification.type === 'success' ? 'bg-green-600' : 'bg-red-600'
-            } text-white px-4 py-2 rounded-lg shadow-lg z-50`}
-          >
-            {notification.message}
           </div>
         )}
       </div>
