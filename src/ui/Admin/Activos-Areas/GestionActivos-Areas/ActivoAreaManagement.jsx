@@ -268,7 +268,6 @@ const ActivoAreaManagement = () => {
                 );
                 const result = await response.json();
                 if (result.success) {
-                  toast.success('Asignación actualizada exitosamente');
                   const updatedActivo = {
                     ...result.data,
                     idActivoArea: result.data.id,
@@ -288,6 +287,7 @@ const ActivoAreaManagement = () => {
                     await fetchAssignedActivos();
                   }
                   closeEditModal();
+                  toast.success('Asignación actualizada exitosamente');
                 } else {
                   setErrors(result.errors || { general: result.message });
                   toast.error(`Error: ${result.message}`);
