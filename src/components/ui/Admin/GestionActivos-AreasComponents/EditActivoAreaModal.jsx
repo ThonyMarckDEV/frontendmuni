@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Package, Building, X } from 'lucide-react';
 
 const EditActivoAreaModal = ({
@@ -13,6 +13,8 @@ const EditActivoAreaModal = ({
   handleEditSubmit,
   setEditModalOpen,
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -27,12 +29,18 @@ const EditActivoAreaModal = ({
     }
   };
 
+  const handleSubmit = async (e) => {
+    setIsSubmitting(true);
+    await handleEditSubmit(e);
+    setIsSubmitting(false);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-7 h-7" fill="none" strokemm="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -46,7 +54,7 @@ const EditActivoAreaModal = ({
             <X className="w-6 h-6" />
           </button>
         </div>
-        <form onSubmit={handleEditSubmit} className="p-8">
+        <form onSubmit={handleSubmit} className="p-8">
           <div className="space-y-6">
             <h3 className="text-xl font-semibold text-gray-800 border-b-2 border-blue-200 pb-2">
               DETALLES DE LA ASIGNACIÓN
@@ -57,10 +65,10 @@ const EditActivoAreaModal = ({
                 name="idArea"
                 value={formData.idArea}
                 onChange={handleInputChange}
-                disabled={loadingAreas}
+                disabled={loadingAreas || isSubmitting}
                 className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white ${
                   errors.idArea ? 'border-red-500' : 'border-gray-300'
-                } ${loadingAreas ? 'cursor-not-allowed opacity-50' : ''}`}
+                } ${loadingAreas || isSubmitting ? 'cursor-not-allowed opacity-50' : ''}`}
               >
                 {loadingAreas ? (
                   <option value="" disabled>
@@ -90,10 +98,10 @@ const EditActivoAreaModal = ({
                 name="idActivo"
                 value={formData.idActivo}
                 onChange={handleInputChange}
-                disabled={loadingActivos}
+                disabled={loadingActivos || isSubmitting}
                 className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white ${
                   errors.idActivo ? 'border-red-500' : 'border-gray-300'
-                } ${loadingActivos ? 'cursor-not-allowed opacity-50' : ''}`}
+                } ${loadingActivos || isSubmitting ? 'cursor-not-allowed opacity-50' : ''}`}
               >
                 {loadingActivos ? (
                   <option value="" disabled>
@@ -104,7 +112,7 @@ const EditActivoAreaModal = ({
                     <option value="">SELECCIONE ACTIVO</option>
                     {activos.map((activo) => (
                       <option key={activo.idActivo} value={activo.idActivo}>
-                        COD: {activo.codigo_inventario} - MARCA: {activo.marca_modelo} -  TIPO: {activo.tipo} 
+                        COD: {activo.codigo_inventario} - MARCA: {activo.marca_modelo} - TIPO: {activo.tipo}
                       </option>
                     ))}
                   </>
@@ -123,14 +131,42 @@ const EditActivoAreaModal = ({
             <div className="mt-8 flex justify-center gap-4">
               <button
                 type="submit"
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-12 rounded-lg shadow-lg transform transition-all duration-200 hover:scale-105"
+                disabled={isSubmitting}
+                className={`flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-4 px-12 rounded-lg shadow-lg transform transition-all duration-200 ${
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:from-blue-700 hover:to-blue-800 hover:scale-105'
+                }`}
               >
-                ACTUALIZAR
+                {isSubmitting && (
+                  <svg
+                    className="animate-spin h-5 w-5 mr-2 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                )}
+                {isSubmitting ? 'Actualizando...' : 'ACTUALIZAR'}
               </button>
               <button
                 type="button"
                 onClick={() => setEditModalOpen(false)}
-                className="bg-gray-300 text-gray-800 font-bold py-4 px-12 rounded-lg shadow-lg hover:bg-gray-400"
+                disabled={isSubmitting}
+                className={`bg-gray-300 text-gray-800 font-bold py-4 px-12 rounded-lg shadow-lg hover:bg-gray-400 ${
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 CANCELAR
               </button>

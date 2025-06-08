@@ -87,38 +87,41 @@ const ActivoAreaManagement = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedArea) {
-      const fetchAssignedActivos = async () => {
-        setLoadingAssigned(true);
-        try {
-          const response = await fetchWithAuth(`${API_BASE_URL}/api/areas/${selectedArea}/activos`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-          });
-          const result = await response.json();
-          console.log('Assigned Activos API response:', result);
-          if (result.success && Array.isArray(result.data)) {
-            const normalizedData = result.data.map((item, index) => ({
-              ...item,
-              id: item.id || item.idActivoArea || item.idActivo || `temp-id-${index}`,
-            }));
-            setAssignedActivos(normalizedData);
-          } else {
-            setAssignedActivos([]);
-            console.error('Error fetching assigned activos:', result.message || 'Invalid data format');
-            showNotification('Error al cargar activos asignados', 'error');
-          }
-        } catch (error) {
-          console.error('Error fetching assigned activos:', error.message);
+    const fetchAssignedActivos = async () => {
+      setLoadingAssigned(true);
+      setSelectedActivoArea(null); // Reset selectedActivoArea before fetching new data
+      try {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/areas/${selectedArea}/activos`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const result = await response.json();
+        console.log('Assigned Activos API response:', result);
+        if (result.success && Array.isArray(result.data)) {
+          const normalizedData = result.data.map((item, index) => ({
+            ...item,
+            id: item.id || item.idActivoArea || item.idActivo || `temp-id-${index}`,
+          }));
+          setAssignedActivos(normalizedData);
+        } else {
           setAssignedActivos([]);
+          console.error('Error fetching assigned activos:', result.message || 'Invalid data format');
           showNotification('Error al cargar activos asignados', 'error');
-        } finally {
-          setLoadingAssigned(false);
         }
-      };
+      } catch (error) {
+        console.error('Error fetching assigned activos:', error.message);
+        setAssignedActivos([]);
+        showNotification('Error al cargar activos asignados', 'error');
+      } finally {
+        setLoadingAssigned(false);
+      }
+    };
+
+    if (selectedArea) {
       fetchAssignedActivos();
     } else {
       setAssignedActivos([]);
+      setSelectedActivoArea(null);
     }
   }, [selectedArea]);
 
@@ -128,8 +131,8 @@ const ActivoAreaManagement = () => {
 
   const openEditModal = (activoArea) => {
     setFormData({
-      idActivo: activoArea.idActivo,
-      idArea: activoArea.idArea,
+      idActivo: activoArea.idActivo || '',
+      idArea: activoArea.idArea || '',
     });
     setEditModalOpen(true);
     setSelectedActivoArea(activoArea.id || activoArea.idActivoArea);
@@ -151,7 +154,7 @@ const ActivoAreaManagement = () => {
       const result = await response.json();
       if (result.success) {
         showNotification('Asignación eliminada exitosamente');
-        setAssignedActivos(assignedActivos.filter((aa) => aa.id !== activoAreaToDelete));
+        setAssignedActivos(assignedActivos.filter((aa) => (aa.id || aa.idActivoArea) !== activoAreaToDelete));
         setSelectedActivoArea(null);
       } else {
         showNotification(`Error: ${result.message}`, 'error');
@@ -196,9 +199,9 @@ const ActivoAreaManagement = () => {
           selectedActivoArea={selectedActivoArea}
           handleSelectActivoArea={handleSelectActivoArea}
         />
-        {selectedActivoArea && (
+        {selectedActivoArea && assignedActivos.some((aa) => (aa.id || aa.idActivoArea) === selectedActivoArea) && (
           <ActionBar
-            activoArea={assignedActivos.find((aa) => aa.id === selectedActivoArea || aa.idActivoArea === selectedActivoArea)}
+            activoArea={assignedActivos.find((aa) => (aa.id || aa.idActivoArea) === selectedActivoArea)}
             openEditModal={openEditModal}
             handleDelete={openConfirmDelete}
           />
@@ -235,9 +238,18 @@ const ActivoAreaManagement = () => {
                 const result = await response.json();
                 if (result.success) {
                   showNotification('Asignación actualizada exitosamente');
+                  const updatedActivo = {
+                    ...result.data,
+                    id: result.data.id || result.data.idActivoArea,
+                    codigo_inventario: activos.find((a) => a.idActivo === result.data.idActivo)?.codigo_inventario || '',
+                    tipo: activos.find((a) => a.idActivo === result.data.idActivo)?.tipo || '',
+                    marca_modelo: activos.find((a) => a.idActivo === result.data.idActivo)?.marca_modelo || '',
+                    estado: activos.find((a) => a.idActivo === result.data.idActivo)?.estado || true,
+                    idArea: result.data.idArea,
+                  };
                   setAssignedActivos((prev) =>
                     prev.map((aa) =>
-                      (aa.id || aa.idActivoArea) === selectedActivoArea ? { ...aa, ...result.data, id: result.data.id || result.data.idActivoArea } : aa
+                      (aa.id || aa.idActivoArea) === selectedActivoArea ? updatedActivo : aa
                     )
                   );
                   closeEditModal();
