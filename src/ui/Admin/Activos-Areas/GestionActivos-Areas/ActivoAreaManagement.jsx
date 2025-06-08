@@ -181,7 +181,7 @@ const ActivoAreaManagement = () => {
         setAssignedActivos(assignedActivos.filter((aa) => (aa.id || aa.idActivoArea) !== activoAreaToDelete));
         setSelectedActivoArea(null);
         if (selectedArea) {
-          await fetchAssignedActivos(); // Refresh data after delete
+          await fetchAssignedActivos();
         }
       } else {
         showNotification(`Error: ${result.message}`, 'error');
@@ -272,7 +272,6 @@ const ActivoAreaManagement = () => {
                 const result = await response.json();
                 if (result.success) {
                   showNotification('Asignación actualizada exitosamente');
-                  // Immediate state update for feedback
                   const updatedActivo = {
                     ...result.data,
                     id: result.data.id || result.data.idActivoArea,
@@ -287,7 +286,6 @@ const ActivoAreaManagement = () => {
                       (aa.id || aa.idActivoArea) === activoAreaId ? updatedActivo : aa
                     )
                   );
-                  // Refresh data from backend
                   if (selectedArea) {
                     await fetchAssignedActivos();
                   }
