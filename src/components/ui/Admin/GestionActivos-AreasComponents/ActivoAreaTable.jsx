@@ -3,8 +3,8 @@ import React from 'react';
 const ActivoAreaTable = ({ assignedActivos, loadingAssigned, selectedActivoArea, handleSelectActivoArea }) => {
   // Filter out invalid items and log them for debugging
   const validActivos = assignedActivos.filter((activo) => {
-    if (!activo.id && !activo.idActivo) {
-      console.warn('Invalid activo in assignedActivos:', activo);
+    if (!activo.idActivoArea) {
+      console.warn('Invalid activo in assignedActivos (missing idActivoArea):', activo);
       return false;
     }
     return true;
@@ -45,11 +45,11 @@ const ActivoAreaTable = ({ assignedActivos, loadingAssigned, selectedActivoArea,
           ) : (
             validActivos.map((activo, index) => (
               <tr
-                key={`activo-area-row-${activo.id || activo.idActivo || index}`}
+                key={`activo-area-row-${activo.idActivoArea}`}
                 className={`hover:bg-gray-50 cursor-pointer ${
-                  selectedActivoArea === (activo.id || activo.idActivo) ? 'bg-blue-100' : ''
+                  selectedActivoArea === activo.idActivoArea ? 'bg-blue-100' : ''
                 }`}
-                onClick={() => handleSelectActivoArea(activo.id || activo.idActivo)}
+                onClick={() => handleSelectActivoArea(activo.idActivoArea)}
               >
                 <td className="px-6 py-4 whitespace-nowrap">{activo.codigo_inventario || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{activo.tipo || '-'}</td>

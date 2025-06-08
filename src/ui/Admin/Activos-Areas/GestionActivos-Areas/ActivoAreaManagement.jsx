@@ -7,6 +7,7 @@ import ActionBar from '../../../../components/ui/Admin/GestionActivos-AreasCompo
 import EditActivoAreaModal from '../../../../components/ui/Admin/GestionActivos-AreasComponents/EditActivoAreaModal';
 import { X } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ActivoAreaManagement = () => {
   const [areas, setAreas] = useState([]);
@@ -26,11 +27,11 @@ const ActivoAreaManagement = () => {
   });
   const [errors, setErrors] = useState({});
   const actionBarRef = useRef(null);
-  
+
   const fetchAssignedActivos = async () => {
     setLoadingAssigned(true);
     if (!editModalOpen) {
-      setSelectedActivoArea(null); // Reset only if modal is not open
+      setSelectedActivoArea(null);
     }
     try {
       const response = await fetchWithAuth(`${API_BASE_URL}/api/areas/${selectedArea}/activos`, {
@@ -42,18 +43,18 @@ const ActivoAreaManagement = () => {
       if (result.success && Array.isArray(result.data)) {
         const normalizedData = result.data.map((item, index) => ({
           ...item,
-          id: item.id || item.idActivoArea || item.idActivo || `temp-id-${index}`,
+          id: item.idActivoArea || `temp-${index}`, // Use idActivoArea as primary ID
         }));
         setAssignedActivos(normalizedData);
       } else {
         setAssignedActivos([]);
         console.error('Error fetching assigned activos:', result.message || 'Invalid data format');
-        toast.error('Error al cargar activos asignados', 'error');
+        toast.error('Error al cargar activos asignados');
       }
     } catch (error) {
       console.error('Error fetching assigned activos:', error.message);
       setAssignedActivos([]);
-      toast.error('Error al cargar activos asignados', 'error');
+      toast.error('Error al cargar activos asignados');
     } finally {
       setLoadingAssigned(false);
     }
@@ -74,12 +75,12 @@ const ActivoAreaManagement = () => {
         } else {
           setAreas([]);
           console.error('Error fetching areas:', result.message || 'Invalid data format');
-           toast.error('Error al cargar áreas', 'error');
+          toast.error('Error al cargar áreas');
         }
       } catch (error) {
         console.error('Error fetching areas:', error.message);
         setAreas([]);
-         toast.error('Error al cargar áreas', 'error');
+        toast.error('Error al cargar áreas');
       } finally {
         setLoadingAreas(false);
       }
@@ -99,12 +100,12 @@ const ActivoAreaManagement = () => {
         } else {
           setActivos([]);
           console.error('Error fetching activos:', result.message || 'Invalid data format');
-          toast.error('Error al cargar activos', 'error');
+          toast.error('Error al cargar activos');
         }
       } catch (error) {
         console.error('Error fetching activos:', error.message);
         setActivos([]);
-         toast.error('Error al cargar activos', 'error');
+        toast.error('Error al cargar activos');
       } finally {
         setLoadingActivos(false);
       }
@@ -154,7 +155,7 @@ const ActivoAreaManagement = () => {
       idArea: activoArea.idArea || '',
     });
     setEditModalOpen(true);
-    setSelectedActivoArea(activoArea.id || activoArea.idActivoArea);
+    setSelectedActivoArea(activoArea.idActivoArea);
   };
 
   const closeEditModal = () => {
@@ -173,17 +174,17 @@ const ActivoAreaManagement = () => {
       const result = await response.json();
       if (result.success) {
         toast.success('Asignación eliminada exitosamente');
-        setAssignedActivos(assignedActivos.filter((aa) => (aa.id || aa.idActivoArea) !== activoAreaToDelete));
+        setAssignedActivos(assignedActivos.filter((aa) => aa.idActivoArea !== activoAreaToDelete));
         setSelectedActivoArea(null);
         if (selectedArea) {
           await fetchAssignedActivos();
         }
       } else {
-        toast.error(`Error: ${result.message}`, 'error');
+        toast.error(`Error: ${result.message}`);
       }
     } catch (error) {
       console.error('Error:', error.message);
-       toast.error('Error al eliminar asignación', 'error');
+      toast.error('Error al eliminar asignación');
     } finally {
       setConfirmDeleteOpen(false);
       setActivoAreaToDelete(null);
@@ -197,6 +198,7 @@ const ActivoAreaManagement = () => {
 
   return (
     <div className="min-h-screen py-8 px-4 bg-gray-50">
+      <ToastContainer />
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,10 +223,10 @@ const ActivoAreaManagement = () => {
           selectedActivoArea={selectedActivoArea}
           handleSelectActivoArea={handleSelectActivoArea}
         />
-        {selectedActivoArea && assignedActivos.some((aa) => (aa.id || aa.idActivoArea) === selectedActivoArea) && (
+        {selectedActivoArea && assignedActivos.some((aa) => aa.idActivoArea === selectedActivoArea) && (
           <div ref={actionBarRef}>
             <ActionBar
-              activoArea={assignedActivos.find((aa) => (aa.id || aa.idActivoArea) === selectedActivoArea)}
+              activoArea={assignedActivos.find((aa) => aa.idActivoArea === selectedActivoArea)}
               openEditModal={openEditModal}
               handleDelete={openConfirmDelete}
             />
@@ -252,7 +254,7 @@ const ActivoAreaManagement = () => {
               };
               if (!validateForm()) return;
               if (!activoAreaId) {
-                 toast.error('Error: No se seleccionó un activo válido', 'error');
+                toast.error('Error: No se seleccionó un activo válido');
                 return;
               }
               try {
@@ -269,17 +271,18 @@ const ActivoAreaManagement = () => {
                   toast.success('Asignación actualizada exitosamente');
                   const updatedActivo = {
                     ...result.data,
-                    id: result.data.id || result.data.idActivoArea,
+                    idActivoArea: result.data.id,
+                    id: result.data.id,
+                    idActivo: result.data.idActivo,
+                    idArea: result.data.idArea,
                     codigo_inventario: activos.find((a) => a.idActivo === result.data.idActivo)?.codigo_inventario || '',
                     tipo: activos.find((a) => a.idActivo === result.data.idActivo)?.tipo || '',
                     marca_modelo: activos.find((a) => a.idActivo === result.data.idActivo)?.marca_modelo || '',
                     estado: activos.find((a) => a.idActivo === result.data.idActivo)?.estado || true,
-                    idArea: result.data.idArea,
+                    area: areas.find((a) => a.idArea === result.data.idArea) || { idArea: result.data.idArea, nombre: '' },
                   };
                   setAssignedActivos((prev) =>
-                    prev.map((aa) =>
-                      (aa.id || aa.idActivoArea) === activoAreaId ? updatedActivo : aa
-                    )
+                    prev.map((aa) => (aa.idActivoArea === activoAreaId ? updatedActivo : aa))
                   );
                   if (selectedArea) {
                     await fetchAssignedActivos();
@@ -287,11 +290,11 @@ const ActivoAreaManagement = () => {
                   closeEditModal();
                 } else {
                   setErrors(result.errors || { general: result.message });
-                   toast.error(`Error: ${result.message}`, 'error');
+                  toast.error(`Error: ${result.message}`);
                 }
               } catch (error) {
                 console.error('Error:', error.message);
-                 toast.error('Error al actualizar asignación', 'error');
+                toast.error('Error al actualizar asignación');
               }
             }}
             setEditModalOpen={setEditModalOpen}
