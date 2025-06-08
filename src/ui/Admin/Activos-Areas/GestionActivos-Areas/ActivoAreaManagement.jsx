@@ -6,7 +6,6 @@ import ActivoAreaTable from '../../../../components/ui/Admin/GestionActivos-Area
 import ActionBar from '../../../../components/ui/Admin/GestionActivos-AreasComponents/ActionBar';
 import EditActivoAreaModal from '../../../../components/ui/Admin/GestionActivos-AreasComponents/EditActivoAreaModal';
 import { X } from 'lucide-react';
-import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const ActivoAreaManagement = () => {
