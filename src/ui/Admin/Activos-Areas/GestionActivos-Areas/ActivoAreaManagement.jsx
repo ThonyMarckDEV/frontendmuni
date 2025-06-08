@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { fetchWithAuth } from '../../../../js/authToken';
 import API_BASE_URL from '../../../../js/urlHelper';
 import AreaSelect from '../../../../components/ui/Admin/GestionActivos-AreasComponents/AreaSelect';
@@ -25,10 +25,43 @@ const ActivoAreaManagement = () => {
     idArea: '',
   });
   const [errors, setErrors] = useState({});
+  const actionBarRef = useRef(null);
 
   const showNotification = (message, type = 'success') => {
     setNotification({ show: true, message, type });
     setTimeout(() => setNotification({ show: false, message: '', type: 'success' }), 3000);
+  };
+
+  const fetchAssignedActivos = async () => {
+    setLoadingAssigned(true);
+    if (!editModalOpen) {
+      setSelectedActivoArea(null); // Reset only if modal is not open
+    }
+    try {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/areas/${selectedArea}/activos`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const result = await response.json();
+      console.log('Assigned Activos API response:', result);
+      if (result.success && Array.isArray(result.data)) {
+        const normalizedData = result.data.map((item, index) => ({
+          ...item,
+          id: item.id || item.idActivoArea || item.idActivo || `temp-id-${index}`,
+        }));
+        setAssignedActivos(normalizedData);
+      } else {
+        setAssignedActivos([]);
+        console.error('Error fetching assigned activos:', result.message || 'Invalid data format');
+        showNotification('Error al cargar activos asignados', 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching assigned activos:', error.message);
+      setAssignedActivos([]);
+      showNotification('Error al cargar activos asignados', 'error');
+    } finally {
+      setLoadingAssigned(false);
+    }
   };
 
   useEffect(() => {
@@ -87,46 +120,37 @@ const ActivoAreaManagement = () => {
   }, []);
 
   useEffect(() => {
-    const fetchAssignedActivos = async () => {
-      setLoadingAssigned(true);
-      setSelectedActivoArea(null); // Reset selectedActivoArea before fetching new data
-      try {
-        const response = await fetchWithAuth(`${API_BASE_URL}/api/areas/${selectedArea}/activos`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        const result = await response.json();
-        console.log('Assigned Activos API response:', result);
-        if (result.success && Array.isArray(result.data)) {
-          const normalizedData = result.data.map((item, index) => ({
-            ...item,
-            id: item.id || item.idActivoArea || item.idActivo || `temp-id-${index}`,
-          }));
-          setAssignedActivos(normalizedData);
-        } else {
-          setAssignedActivos([]);
-          console.error('Error fetching assigned activos:', result.message || 'Invalid data format');
-          showNotification('Error al cargar activos asignados', 'error');
-        }
-      } catch (error) {
-        console.error('Error fetching assigned activos:', error.message);
-        setAssignedActivos([]);
-        showNotification('Error al cargar activos asignados', 'error');
-      } finally {
-        setLoadingAssigned(false);
-      }
-    };
-
     if (selectedArea) {
       fetchAssignedActivos();
     } else {
       setAssignedActivos([]);
-      setSelectedActivoArea(null);
+      if (!editModalOpen) {
+        setSelectedActivoArea(null);
+      }
     }
-  }, [selectedArea]);
+  }, [selectedArea, editModalOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        selectedActivoArea &&
+        actionBarRef.current &&
+        !actionBarRef.current.contains(event.target) &&
+        !event.target.closest('tr') &&
+        !editModalOpen
+      ) {
+        setSelectedActivoArea(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [selectedActivoArea, editModalOpen]);
 
   const handleSelectActivoArea = (activoAreaId) => {
-    setSelectedActivoArea(activoAreaId);
+    setSelectedActivoArea((prev) => (prev === activoAreaId ? null : activoAreaId));
   };
 
   const openEditModal = (activoArea) => {
@@ -156,6 +180,9 @@ const ActivoAreaManagement = () => {
         showNotification('Asignación eliminada exitosamente');
         setAssignedActivos(assignedActivos.filter((aa) => (aa.id || aa.idActivoArea) !== activoAreaToDelete));
         setSelectedActivoArea(null);
+        if (selectedArea) {
+          await fetchAssignedActivos(); // Refresh data after delete
+        }
       } else {
         showNotification(`Error: ${result.message}`, 'error');
       }
@@ -200,11 +227,13 @@ const ActivoAreaManagement = () => {
           handleSelectActivoArea={handleSelectActivoArea}
         />
         {selectedActivoArea && assignedActivos.some((aa) => (aa.id || aa.idActivoArea) === selectedActivoArea) && (
-          <ActionBar
-            activoArea={assignedActivos.find((aa) => (aa.id || aa.idActivoArea) === selectedActivoArea)}
-            openEditModal={openEditModal}
-            handleDelete={openConfirmDelete}
-          />
+          <div ref={actionBarRef}>
+            <ActionBar
+              activoArea={assignedActivos.find((aa) => (aa.id || aa.idActivoArea) === selectedActivoArea)}
+              openEditModal={openEditModal}
+              handleDelete={openConfirmDelete}
+            />
+          </div>
         )}
         {editModalOpen && (
           <EditActivoAreaModal
@@ -216,7 +245,8 @@ const ActivoAreaManagement = () => {
             activos={activos}
             loadingAreas={loadingAreas}
             loadingActivos={loadingActivos}
-            handleEditSubmit={async (e) => {
+            activoAreaId={selectedActivoArea}
+            handleEditSubmit={async (e, activoAreaId) => {
               e.preventDefault();
               const validateForm = () => {
                 const newErrors = {};
@@ -226,9 +256,13 @@ const ActivoAreaManagement = () => {
                 return Object.keys(newErrors).length === 0;
               };
               if (!validateForm()) return;
+              if (!activoAreaId) {
+                showNotification('Error: No se seleccionó un activo válido', 'error');
+                return;
+              }
               try {
                 const response = await fetchWithAuth(
-                  `${API_BASE_URL}/api/activos-areas/${selectedActivoArea}`,
+                  `${API_BASE_URL}/api/activos-areas/${activoAreaId}`,
                   {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -238,6 +272,7 @@ const ActivoAreaManagement = () => {
                 const result = await response.json();
                 if (result.success) {
                   showNotification('Asignación actualizada exitosamente');
+                  // Immediate state update for feedback
                   const updatedActivo = {
                     ...result.data,
                     id: result.data.id || result.data.idActivoArea,
@@ -249,9 +284,13 @@ const ActivoAreaManagement = () => {
                   };
                   setAssignedActivos((prev) =>
                     prev.map((aa) =>
-                      (aa.id || aa.idActivoArea) === selectedActivoArea ? updatedActivo : aa
+                      (aa.id || aa.idActivoArea) === activoAreaId ? updatedActivo : aa
                     )
                   );
+                  // Refresh data from backend
+                  if (selectedArea) {
+                    await fetchAssignedActivos();
+                  }
                   closeEditModal();
                 } else {
                   setErrors(result.errors || { general: result.message });

@@ -12,6 +12,7 @@ const EditActivoAreaModal = ({
   loadingActivos,
   handleEditSubmit,
   setEditModalOpen,
+  activoAreaId,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,7 +32,7 @@ const EditActivoAreaModal = ({
 
   const handleSubmit = async (e) => {
     setIsSubmitting(true);
-    await handleEditSubmit(e);
+    await handleEditSubmit(e, activoAreaId);
     setIsSubmitting(false);
   };
 
@@ -40,7 +41,7 @@ const EditActivoAreaModal = ({
       <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <svg className="w-7 h-7" fill="none" strokemm="currentColor" viewBox="0 0 24 24">
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
