@@ -7,6 +7,7 @@ import ActionBar from '../../../../components/ui/Admin/GestionActivos-AreasCompo
 import EditActivoAreaModal from '../../../../components/ui/Admin/GestionActivos-AreasComponents/EditActivoAreaModal';
 import { X } from 'lucide-react';
 import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 
 const ActivoAreaManagement = () => {
   const [areas, setAreas] = useState([]);
