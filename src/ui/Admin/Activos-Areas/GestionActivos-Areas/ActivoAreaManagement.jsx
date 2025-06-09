@@ -7,7 +7,7 @@ import ActionBar from '../../../../components/ui/Admin/GestionActivos-AreasCompo
 import EditActivoAreaModal from '../../../../components/ui/Admin/GestionActivos-AreasComponents/EditActivoAreaModal';
 import { X } from 'lucide-react';
 import 'react-toastify/dist/ReactToastify.css';
-import { toast, ToastContainer} from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 
 const ActivoAreaManagement = () => {
   const [areas, setAreas] = useState([]);
@@ -262,9 +262,7 @@ const ActivoAreaManagement = () => {
                 return;
               }
               if (!activoAreaId) {
-                if (!toast.isActive('edit-error')) {
-                  toast.error('Error: No se seleccionó un activo válido', { toastId: 'edit-error' });
-                }
+                toast.error('Error: No se seleccionó un activo válido');
                 setIsSubmitting(false);
                 return;
               }
@@ -297,21 +295,15 @@ const ActivoAreaManagement = () => {
                   if (selectedArea) {
                     await fetchAssignedActivos();
                   }
+                  toast.success('Asignación actualizada exitosamente');
                   closeEditModal();
-                  if (!toast.isActive('edit-success')) {
-                    toast.success('Asignación actualizada exitosamente', { toastId: 'edit-success' });
-                  }
                 } else {
                   setErrors(result.errors || { general: result.message });
-                  if (!toast.isActive('edit-error')) {
-                    toast.error(`Error: ${result.message}`, { toastId: 'edit-error' });
-                  }
+                  toast.error(`Error: ${result.message}`);
                 }
               } catch (error) {
                 console.error('Error:', error.message);
-                if (!toast.isActive('edit-error')) {
-                  toast.error('Error al actualizar asignación', { toastId: 'edit-error' });
-                }
+                toast.error('Error al actualizar asignación');
               } finally {
                 setIsSubmitting(false);
               }
