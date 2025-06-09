@@ -12,9 +12,9 @@ import {
   ChevronDown,
   ChevronRight,
   Wrench,
-  Monitor, // Para Activos
-  MapPin,  // Para Áreas
-  Layers   // Para Activos/Áreas
+  Monitor,
+  MapPin,
+  Layers
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { logout } from '../../js/logout';
@@ -120,6 +120,20 @@ const Sidebar = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  // New useEffect to handle body overflow
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'; // Disable background scrolling
+    } else {
+      document.body.style.overflow = ''; // Re-enable scrolling
+    }
+
+    // Cleanup on component unmount
+    return () => {
+      document.body.style.overflow = '';
     };
   }, [isOpen]);
 
@@ -232,7 +246,7 @@ const Sidebar = () => {
                         className={`
                           flex items-center w-full px-4 py-3 text-sm transition-colors duration-200 text-left
                           ${isActive 
-                            ? 'bg-blue-600 text-white border-r-2 border-blue-400' 
+                            ? 'bg-blue-600 text-white border-rT-2 border-blue-400' 
                             : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                           }
                         `}
