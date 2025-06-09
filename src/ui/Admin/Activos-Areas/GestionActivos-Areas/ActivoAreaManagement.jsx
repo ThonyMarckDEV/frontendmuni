@@ -201,7 +201,6 @@ const ActivoAreaManagement = () => {
 
   return (
     <div className="min-h-screen py-8 px-4 bg-gray-50">
-      <ToastContainer />
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
