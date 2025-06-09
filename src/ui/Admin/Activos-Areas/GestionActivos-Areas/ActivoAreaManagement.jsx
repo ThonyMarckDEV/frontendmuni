@@ -7,7 +7,7 @@ import ActionBar from '../../../../components/ui/Admin/GestionActivos-AreasCompo
 import EditActivoAreaModal from '../../../../components/ui/Admin/GestionActivos-AreasComponents/EditActivoAreaModal';
 import { X } from 'lucide-react';
 import 'react-toastify/dist/ReactToastify.css';
-import { toast , ToastContainer} from 'react-toastify';
+import { toast, ToastContainer} from 'react-toastify';
 
 const ActivoAreaManagement = () => {
   const [areas, setAreas] = useState([]);
@@ -50,17 +50,12 @@ const ActivoAreaManagement = () => {
       } else {
         setAssignedActivos([]);
         console.error('Error fetching assigned activos:', result.message || 'Invalid data format');
-        // Avoid duplicate toasts by checking toast.isActive
-        if (!toast.isActive('fetch-error')) {
-          toast.error('Error al cargar activos asignados', { toastId: 'fetch-error' });
-        }
+        toast.error('Error al cargar activos asignados');
       }
     } catch (error) {
       console.error('Error fetching assigned activos:', error.message);
       setAssignedActivos([]);
-      if (!toast.isActive('fetch-error')) {
-        toast.error('Error al cargar activos asignados', { toastId: 'fetch-error' });
-      }
+      toast.error('Error al cargar activos asignados');
     } finally {
       setLoadingAssigned(false);
     }
@@ -82,15 +77,13 @@ const ActivoAreaManagement = () => {
           setAreas([]);
           console.error('Error fetching areas:', result.message || 'Invalid data format');
           if (!toast.isActive('areas-error')) {
-            toast.error('Error al cargar áreas', { toastId: 'areas-error' });
+            toast.error('Error al cargar áreas');
           }
         }
       } catch (error) {
         console.error('Error fetching areas:', error.message);
         setAreas([]);
-        if (!toast.isActive('areas-error')) {
-          toast.error('Error al cargar áreas', { toastId: 'areas-error' });
-        }
+        toast.error('Error al cargar áreas');
       } finally {
         setLoadingAreas(false);
       }
@@ -110,16 +103,12 @@ const ActivoAreaManagement = () => {
         } else {
           setActivos([]);
           console.error('Error fetching activos:', result.message || 'Invalid data format');
-          if (!toast.isActive('activos-error')) {
-            toast.error('Error al cargar activos', { toastId: 'activos-error' });
-          }
+          toast.error('Error al cargar activos');
         }
       } catch (error) {
         console.error('Error fetching activos:', error.message);
         setActivos([]);
-        if (!toast.isActive('activos-error')) {
-          toast.error('Error al cargar activos', { toastId: 'activos-error' });
-        }
+        toast.error('Error al cargar activos');
       } finally {
         setLoadingActivos(false);
       }
@@ -187,24 +176,18 @@ const ActivoAreaManagement = () => {
       });
       const result = await response.json();
       if (result.success) {
-        if (!toast.isActive('delete-success')) {
-          toast.success('Asignación eliminada exitosamente', { toastId: 'delete-success' });
-        }
+        toast.success('Asignación eliminada exitosamente');
         setAssignedActivos(assignedActivos.filter((aa) => aa.idActivoArea !== activoAreaToDelete));
         setSelectedActivoArea(null);
         if (selectedArea) {
           await fetchAssignedActivos();
         }
       } else {
-        if (!toast.isActive('delete-error')) {
-          toast.error(`Error: ${result.message}`, { toastId: 'delete-error' });
-        }
+        toast.error(`Error: ${result.message}`);
       }
     } catch (error) {
       console.error('Error:', error.message);
-      if (!toast.isActive('delete-error')) {
-        toast.error('Error al eliminar asignación', { toastId: 'delete-error' });
-      }
+      toast.error('Error al eliminar asignación');
     } finally {
       setConfirmDeleteOpen(false);
       setActivoAreaToDelete(null);
@@ -218,19 +201,7 @@ const ActivoAreaManagement = () => {
 
   return (
     <div className="min-h-screen py-8 px-4 bg-gray-50">
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        limit={1}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
+      <ToastContainer />
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">

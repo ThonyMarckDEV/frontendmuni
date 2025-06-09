@@ -27,6 +27,7 @@ import RegistroAreas from './ui/Admin/Areas/RegistroAreas/RegistroAreas';
 import GestionAreas from './ui/Admin/Areas/GestionAreas/AreaManagement';
 import RegistroActivosAreas from './ui/Admin/Activos-Areas/RegistroActivos-Areas/RegistroActivosAreas';
 import GestionActivosAreas from './ui/Admin/Activos-Areas/GestionActivos-Areas/ActivoAreaManagement';
+import GestionIncidentesAdmin from './ui/Admin/Incidentes/GestionIncidentes/IncidentesManagement';
 
 
 // UIS USUARIOS
@@ -57,6 +58,7 @@ function AppContent() {
       <Route path="/admin/gestion-areas" element={<ProtectedRouteAdmin element={<GestionAreas />} />} />
       <Route path="/admin/registro-activos-areas" element={<ProtectedRouteAdmin element={<RegistroActivosAreas />} />} />
       <Route path="/admin/gestion-activos-areas" element={<ProtectedRouteAdmin element={<GestionActivosAreas />} />} />
+      <Route path="/admin/gestion-incidentes" element={<ProtectedRouteAdmin element={<GestionIncidentesAdmin />} />} />
 
       {/* Rutas Usuario */}
       <Route path="/usuario" element={<ProtectedRouteUsuario element={<HomeUsuario />} />} />

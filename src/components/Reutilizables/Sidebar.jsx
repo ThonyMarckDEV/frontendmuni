@@ -71,7 +71,7 @@ const Sidebar = () => {
               { label: 'Gestión', path: '/admin/gestion-activos-areas' },
             ]
           },
-          { icon: AlertTriangle, label: 'Incidentes', path: '/admin/incidentes' },
+          { icon: AlertTriangle, label: 'Incidentes', path: '/admin/gestion-incidentes' },
         ];
       case 'tecnico':
         return [
