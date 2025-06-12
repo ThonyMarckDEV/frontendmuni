@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchWithAuth } from '../../../../js/authToken';
 import API_BASE_URL from '../../../../js/urlHelper';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Pencil, X, AlertTriangle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
+import IncidenteTable from '../../../../components/ui/Tecnico/GestionIncidentesComponents/IncidenteTable'; // Adjust the import path as needed
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 const IncidentesManagement = () => {
   const [incidentes, setIncidentes] = useState([]);
@@ -12,7 +14,9 @@ const IncidentesManagement = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedIncidente, setSelectedIncidente] = useState(null);
+  const [selectedIncidentes, setSelectedIncidentes] = useState([]);
   const [formData, setFormData] = useState({
     estado: 2,
     comentarios_tecnico: '',
@@ -49,7 +53,15 @@ const IncidentesManagement = () => {
     fetchIncidentes(currentPage);
   }, [currentPage, fetchIncidentes]);
 
-  const handleEdit = (incidente) => {
+  const handleSelectIncidente = (idIncidente) => {
+    setSelectedIncidentes((prev) =>
+      prev.includes(idIncidente)
+        ? prev.filter((id) => id !== idIncidente)
+        : [...prev, idIncidente]
+    );
+  };
+
+  const openEditModal = (incidente) => {
     setSelectedIncidente(incidente);
     setFormData({
       estado: 2,
@@ -58,11 +70,21 @@ const IncidentesManagement = () => {
     setEditModalOpen(true);
   };
 
+  const openDetailsModal = (incidente) => {
+    setSelectedIncidente(incidente);
+    setDetailsModalOpen(true);
+  };
+
   const closeEditModal = () => {
     setEditModalOpen(false);
     setSelectedIncidente(null);
     setFormData({ estado: 2, comentarios_tecnico: '' });
     setErrors({});
+  };
+
+  const closeDetailsModal = () => {
+    setDetailsModalOpen(false);
+    setSelectedIncidente(null);
   };
 
   const handleEditSubmit = async (e) => {
@@ -107,157 +129,55 @@ const IncidentesManagement = () => {
     }
   };
 
-  const priorityLabel = (prioridad) => {
-    switch (prioridad) {
-      case 0: return 'Baja';
-      case 1: return 'Media';
-      case 2: return 'Alta';
-      default: return 'Desconocida';
+  const formatDate = (date) => {
+    try {
+      return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: es });
+    } catch {
+      return '-';
     }
   };
 
-  const priorityColor = (prioridad) => {
-    switch (prioridad) {
-      case 0: return 'bg-green-100 border-green-300';
-      case 1: return 'bg-yellow-100 border-yellow-300';
-      case 2: return 'bg-red-100 border-red-300';
-      default: return 'bg-gray-100 border-gray-300';
-    }
+  const formatActivo = (activo) => {
+    if (!activo) return 'No especificado';
+    const parts = [];
+    if (activo.codigo_inventario) parts.push(`${activo.codigo_inventario}`);
+    if (activo.tipo) parts.push(activo.tipo);
+    if (activo.marca_modelo) parts.push(activo.marca_modelo);
+    return parts.join(' • ') || 'No especificado';
   };
 
-  const stateLabel = (estado) => {
-    switch (estado) {
-      case 0: return 'Pendiente';
-      case 1: return 'En progreso';
-      case 2: return 'Resuelto';
-      default: return 'Desconocido';
-    }
+  const formatTecnico = (tecnico) => {
+    if (!tecnico) return 'No asignado';
+    return `${tecnico.nombre} ${tecnico.apellido}`;
   };
 
-  const stateBadge = (estado) => {
-    switch (estado) {
-      case 0: return 'bg-gray-500';
-      case 1: return 'bg-blue-500';
-      case 2: return 'bg-green-500';
-      default: return 'bg-gray-500';
-    }
+  const formatUbicacion = (activo) => {
+    return activo?.ubicacion || 'No especificada';
   };
 
   return (
-    <div className="min-h-screen py-6 px-4 bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen py-8 px-4 bg-gray-50">
       <div className="max-w-7xl mx-auto">
-        <motion.h1
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-4xl font-bold text-gray-900 mb-8 flex items-center gap-3"
-        >
-          <AlertTriangle className="w-8 h-8 text-orange-500" />
+        <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
           Gestión de Incidentes
-        </motion.h1>
+        </h1>
 
-        {/* Incidentes Grid */}
-        {loading ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center text-gray-600 text-lg"
-          >
-            Cargando incidentes...
-          </motion.div>
-        ) : incidentes.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center text-gray-600 text-lg"
-          >
-            No hay incidentes asignados
-          </motion.div>
-        ) : (
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <AnimatePresence>
-              {incidentes.map((incidente) => (
-                <motion.div
-                  key={incidente.idIncidente}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className={`p-6 rounded-xl shadow-lg border-2 ${priorityColor(
-                    incidente.prioridad
-                  )} transform transition-transform hover:scale-105`}
-                >
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm font-semibold text-gray-600">
-                      #{incidente.idIncidente}
-                    </span>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium text-white ${stateBadge(
-                        incidente.estado
-                      )}`}
-                    >
-                      {stateLabel(incidente.estado)}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {incidente.titulo}
-                  </h3>
-                  <p className="text-gray-800 text-base mb-4 font-medium leading-relaxed">
-                    {incidente.descripcion}
-                  </p>
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <p>
-                      <span className="font-medium">Activo:</span>{' '}
-                      {incidente.activo
-                        ? `${incidente.activo.codigo_inventario} (${incidente.activo.tipo})`
-                        : '-'}
-                    </p>
-                    <p>
-                      <span className="font-medium">Ubicación:</span>{' '}
-                      {incidente.activo?.ubicacion || '-'}
-                    </p>
-                    <p>
-                      <span className="font-medium">Área:</span>{' '}
-                      {incidente.area?.nombre || '-'}
-                    </p>
-                    <p>
-                      <span className="font-medium">Prioridad:</span>{' '}
-                      {priorityLabel(incidente.prioridad)}
-                    </p>
-                    <p>
-                      <span className="font-medium">Fecha Reporte:</span>{' '}
-                      {new Date(incidente.fecha_reporte).toLocaleDateString('es-ES')}
-                    </p>
-                    <p>
-                      <span className="font-medium">Comentarios Técnico:</span>{' '}
-                      {incidente.comentarios_tecnico || '-'}
-                    </p>
-                  </div>
-                  <div className="mt-4 flex justify-end">
-                    <button
-                      onClick={() => handleEdit(incidente)}
-                      className="p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-                      title="Editar"
-                      disabled={incidente.estado === 2}
-                    >
-                      <Pencil className="w-5 h-5" />
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        )}
+        {/* IncidenteTable Component */}
+        <IncidenteTable
+          incidentes={incidentes}
+          loading={loading}
+          selectedIncidentes={selectedIncidentes}
+          handleSelectIncidente={handleSelectIncidente}
+          openEditModal={openEditModal}
+          openDetailsModal={openDetailsModal}
+        />
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mt-8 flex justify-between items-center"
-          >
+          <div className="mt-8 flex justify-between items-center">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
@@ -275,36 +195,28 @@ const IncidentesManagement = () => {
             >
               Siguiente
             </button>
-          </motion.div>
+          </div>
         )}
 
         {/* Edit Modal */}
         {editModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8"
-            >
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-800">
                   Editar Incidente #{selectedIncidente?.idIncidente}
                 </h2>
                 <button
                   onClick={closeEditModal}
-                  className="p-1 rounded-full text-gray-600 hover:bg-gray-200 transition-colors"
+                  className="text-gray-600 hover:text-gray-800"
                 >
                   <X className="w-6 h-6" />
                 </button>
               </div>
               <form onSubmit={handleEditSubmit}>
-                <div className="mb-6">
+                <div className="mb-4">
                   <label
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className="block text-sm font-medium text-gray-700 mb-1"
                     htmlFor="estado"
                   >
                     Estado
@@ -321,9 +233,9 @@ const IncidentesManagement = () => {
                     <p className="text-red-500 text-xs mt-1">{errors.estado}</p>
                   )}
                 </div>
-                <div className="mb-6">
+                <div className="mb-4">
                   <label
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className="block text-sm font-medium text-gray-700 mb-1"
                     htmlFor="comentarios_tecnico"
                   >
                     Comentarios Técnico
@@ -343,27 +255,114 @@ const IncidentesManagement = () => {
                   )}
                 </div>
                 {errors.general && (
-                  <p className="text-red-500 text-sm mb-6">{errors.general}</p>
+                  <p className="text-red-500 text-sm mb-4">{errors.general}</p>
                 )}
                 <div className="flex justify-end gap-4">
                   <button
                     type="button"
                     onClick={closeEditModal}
-                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                    className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-400"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
+                    className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 disabled:bg-blue-300"
                   >
                     {isSubmitting ? 'Guardando...' : 'Guardar'}
                   </button>
                 </div>
               </form>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
+        )}
+
+        {/* Details Modal */}
+        {detailsModalOpen && selectedIncidente && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-800">
+                  Detalles del Incidente #{selectedIncidente.idIncidente}
+                </h2>
+                <button
+                  onClick={closeDetailsModal}
+                  className="text-gray-600 hover:text-gray-800"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="space-y-4 text-sm text-gray-700">
+                <div>
+                  <p className="font-medium text-gray-800">Título:</p>
+                  <p>{selectedIncidente.titulo || 'Sin título'}</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800">Descripción:</p>
+                  <p>{selectedIncidente.descripcion || 'Sin descripción'}</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800">Activo:</p>
+                  <p>{formatActivo(selectedIncidente.activo)}</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800">Ubicación:</p>
+                  <p>{formatUbicacion(selectedIncidente.activo)}</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800">Área:</p>
+                  <p>{selectedIncidente.area?.nombre || 'No especificada'}</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800">Prioridad:</p>
+                  <p>
+                    {(() => {
+                      switch (selectedIncidente.prioridad) {
+                        case 0: return 'Baja';
+                        case 1: return 'Media';
+                        case 2: return 'Alta';
+                        default: return 'Desconocida';
+                      }
+                    })()}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800">Fecha de Reporte:</p>
+                  <p>{formatDate(selectedIncidente.fecha_reporte)}</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800">Técnico:</p>
+                  <p>{formatTecnico(selectedIncidente.tecnico)}</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800">Comentarios Técnico:</p>
+                  <p>{selectedIncidente.comentarios_tecnico || 'Sin comentarios'}</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800">Estado:</p>
+                  <p>
+                    {(() => {
+                      switch (selectedIncidente.estado) {
+                        case 0: return 'Pendiente';
+                        case 1: return 'En progreso';
+                        case 2: return 'Resuelto';
+                        default: return 'Desconocido';
+                      }
+                    })()}
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={closeDetailsModal}
+                  className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-400"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { AlertCircle, Clock, CheckCircle2, User, MapPin, Edit, Eye, MessageSquare } from 'lucide-react';
+import { AlertCircle, Clock, CheckCircle2, User, MapPin, Edit, Eye } from 'lucide-react';
 
 const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectIncidente, openEditModal, openDetailsModal }) => {
   const getEstadoConfig = (estado) => {
@@ -100,10 +100,6 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
     return activo?.ubicacion || 'No especificada';
   };
 
-  const formatComentariosTecnico = (comentarios) => {
-    return comentarios ? comentarios : 'Sin comentarios';
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
@@ -198,14 +194,7 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
                       </div>
                     )}
 
-                    {incidente.comentarios_tecnico && (
-                      <div>
-                        <p className="font-medium text-gray-800 mb-2">Comentarios Técnico:</p>
-                        <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">{formatComentariosTecnico(incidente.comentarios_tecnico)}</p>
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-1 gap-3 pt-3 border-t border-gray-200">
+                    <div className=":grid grid-cols-1 gap-3 pt-3 border-t border-gray-200">
                       <div className="flex items-center gap-3">
                         <Clock size={14} className="text-gray-400" />
                         <span className="text-gray-600 text-sm">{formatDate(incidente.fecha_reporte)}</span>
@@ -235,14 +224,10 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
                       e.stopPropagation();
                       openEditModal(incidente);
                     }}
-                    disabled={incidente.estado === 1 || incidente.estado === 2}
-                    className={`flex items-center justify-center gap-2 text-white text-sm font-medium py-3 px-4 rounded-lg shadow-sm transition-all duration-200 flex-1
-                      ${
-                        incidente.estado === 1 || incidente.estado === 2
-                          ? 'bg-gray-400 cursor-not-allowed opacity-60'
-                          : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-md focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
-                      }`}
-                    aria-label={`Editar incidente ${incidente.idIncidente}`}
+                    disabled={incidente.estado === 2}
+                    className={`flex items-center justify-center gap-2 text-white text-sm font-medium py-3 px-4 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex-1 ${
+                      incidente.estado === 2 ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+                    }`}
                   >
                     <Edit size={16} />
                     <span>Editar</span>
@@ -253,7 +238,6 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
                       openDetailsModal(incidente);
                     }}
                     className="flex items-center justify-center gap-2 bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium py-3 px-4 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 flex-1"
-                    aria-label={`Ver detalles del incidente ${incidente.idIncidente}`}
                   >
                     <Eye size={16} />
                     <span>Detalles</span>

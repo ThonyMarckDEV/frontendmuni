@@ -29,7 +29,7 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
 
   const formatDate = (date) => {
     try {
-      return format(new Date(date), 'dd/MM/yyyy hh:mm', { locale: es });
+      return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: es });
     } catch (error) {
       return '-';
     }
@@ -38,6 +38,10 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
   const formatActivo = (activo) => {
     if (!activo) return '-';
     return `COD: ${activo.codigo_inventario} - TIPO: ${activo.tipo} - MARCA: ${activo.marca_modelo} - UBICACION: ${activo.ubicacion}`;
+  };
+
+  const formatComentariosTecnico = (comentarios) => {
+    return comentarios ? comentarios : 'Sin comentarios';
   };
 
   const estadoText = getEstadoText(incidente.estado);
@@ -144,6 +148,14 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
                   >
                     {estadoText}
                   </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">Técnico Asignado:</span>
+                  {incidente.tecnico?.nombre + ' ' + incidente.tecnico?.apellido || 'No asignado'}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">Comentarios Técnico:</span>
+                  {formatComentariosTecnico(incidente.comentarios_tecnico)}
                 </div>
               </div>
             </div>
