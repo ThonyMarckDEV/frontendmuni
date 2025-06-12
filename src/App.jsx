@@ -37,6 +37,7 @@ import GestionIncidentes from './ui/Usuario/Incidentes/GestionIncidentes/Inciden
 
 // UIS TECNICO
 import HomeTecnico from './ui/Tecnico/Home/HomeTecnico';
+import GestionIncidentesTecnico from './ui/Tecnico/GestionIncidentes/IncidentesManagement/IncidentesManagement';
 
 // Utilities
 import ProtectedRouteHome from './utilities/ProtectedRouteHome';
@@ -70,6 +71,7 @@ function AppContent() {
 
       {/* Rutas Técnico */}
       <Route path="/tecnico" element={<ProtectedRouteTecnico element={<HomeTecnico />} />} />
+      <Route path="/tecnico/gestion-incidentes" element={<ProtectedRouteTecnico element={<GestionIncidentesTecnico />} />} />
 
       {/* Ruta de error */}
       <Route path="/*" element={<ErrorPage />} />
