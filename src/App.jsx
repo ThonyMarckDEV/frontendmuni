@@ -35,6 +35,9 @@ import HomeUsuario from './ui/Usuario/Home/HomeUsuario';
 import RegistroIncidentes from './ui/Usuario/Incidentes/RegistroIncidentes/IncidenteRegister';
 import GestionIncidentes from './ui/Usuario/Incidentes/GestionIncidentes/IncidenteManagement';
 
+// UIS TECNICO
+import HomeTecnico from './ui/Tecnico/Home/HomeTecnico';
+
 // Utilities
 import ProtectedRouteHome from './utilities/ProtectedRouteHome';
 import ProtectedRouteUsuario from './utilities/ProtectedRouteUsuario';
@@ -64,6 +67,9 @@ function AppContent() {
       <Route path="/usuario" element={<ProtectedRouteUsuario element={<HomeUsuario />} />} />
       <Route path="/usuario/registro-incidentes" element={<ProtectedRouteUsuario element={<RegistroIncidentes />} />} />
       <Route path="/usuario/gestion-incidentes" element={<ProtectedRouteUsuario element={<GestionIncidentes />} />} />
+
+      {/* Rutas Técnico */}
+      <Route path="/tecnico" element={<ProtectedRouteTecnico element={<HomeTecnico />} />} />
 
       {/* Ruta de error */}
       <Route path="/*" element={<ErrorPage />} />

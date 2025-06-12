@@ -90,6 +90,7 @@ const IncidenteRegister = () => {
     const validateForm = () => {
       const newErrors = {};
       if (!formData.idActivo) newErrors.idActivo = 'El activo es requerido';
+      if (!(formData.titulo || '').trim()) newErrors.titulo = 'El título es requerido';
       if (!(formData.descripcion || '').trim()) newErrors.descripcion = 'La descripción es requerida';
       if (!(formData.fecha_reporte || '').trim()) newErrors.fecha_reporte = 'La fecha de reporte es requerida';
       if (!['0', '1', '2'].includes(formData.prioridad)) newErrors.prioridad = 'La prioridad es requerida';
@@ -101,7 +102,7 @@ const IncidenteRegister = () => {
     try {
       const payload = {
         idActivo: parseInt(formData.idActivo),
-        titulo: formData.titulo || null,
+        titulo: formData.titulo,
         descripcion: formData.descripcion,
         fecha_reporte: formData.fecha_reporte,
         prioridad: parseInt(formData.prioridad),
@@ -200,7 +201,7 @@ const IncidenteRegister = () => {
                   name="titulo"
                   value={formData.titulo}
                   onChange={handleInputChange}
-                  placeholder="Título del Incidente (Opcional)"
+                  placeholder="Título del Incidente"
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                     errors.titulo ? 'border-red-500' : 'border-gray-300'
                   }`}
