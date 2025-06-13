@@ -273,9 +273,7 @@ const IncidentesManagement = () => {
                     onChange={(e) => setFormData({ ...formData, estado: Number(e.target.value) })}
                     className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   >
-                    <option value={0}>Pendiente</option>
                     <option value={1}>En progreso</option>
-                    <option value={2}>Resuelto</option>
                   </select>
                   {errors.estado && <p className="text-red-500 text-xs mt-1">{errors.estado}</p>}
                 </div>
