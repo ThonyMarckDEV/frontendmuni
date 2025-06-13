@@ -100,6 +100,10 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
     return activo?.ubicacion || 'No especificada';
   };
 
+  const formatComentariosTecnico = (comentarios) => {
+    return comentarios ? comentarios : 'Sin comentarios';
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
@@ -191,6 +195,13 @@ const IncidenteTable = ({ incidentes, loading, selectedIncidentes, handleSelectI
                       <div>
                         <p className="font-medium text-gray-800 mb-2">Descripción:</p>
                         <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">{incidente.descripcion}</p>
+                      </div>
+                    )}
+
+                    {incidente.comentarios_tecnico && (
+                      <div>
+                        <p className="font-medium text-gray-800 mb-2">Comentarios Técnico:</p>
+                        <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">{formatComentariosTecnico(incidente.comentarios_tecnico)}</p>
                       </div>
                     )}
 

@@ -4,7 +4,8 @@ import API_BASE_URL from '../../../../js/urlHelper';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { X } from 'lucide-react';
-import IncidenteTable from '../../../../components/ui/Tecnico/GestionIncidentesComponents/IncidenteTable'; // Adjust the import path as needed
+import IncidenteTable from '../../../../components/ui/Tecnico/GestionIncidentesComponents/IncidenteTable';
+import IncidenteDetailsModal from '../../../../components/ui/Tecnico/GestionIncidentesComponents/IncidenteDetailsModal'; // Adjust the import path as needed
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -80,11 +81,6 @@ const IncidentesManagement = () => {
     setSelectedIncidente(null);
     setFormData({ estado: 2, comentarios_tecnico: '' });
     setErrors({});
-  };
-
-  const closeDetailsModal = () => {
-    setDetailsModalOpen(false);
-    setSelectedIncidente(null);
   };
 
   const handleEditSubmit = async (e) => {
@@ -280,89 +276,10 @@ const IncidentesManagement = () => {
 
         {/* Details Modal */}
         {detailsModalOpen && selectedIncidente && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-800">
-                  Detalles del Incidente #{selectedIncidente.idIncidente}
-                </h2>
-                <button
-                  onClick={closeDetailsModal}
-                  className="text-gray-600 hover:text-gray-800"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-              <div className="space-y-4 text-sm text-gray-700">
-                <div>
-                  <p className="font-medium text-gray-800">Título:</p>
-                  <p>{selectedIncidente.titulo || 'Sin título'}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">Descripción:</p>
-                  <p>{selectedIncidente.descripcion || 'Sin descripción'}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">Activo:</p>
-                  <p>{formatActivo(selectedIncidente.activo)}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">Ubicación:</p>
-                  <p>{formatUbicacion(selectedIncidente.activo)}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">Área:</p>
-                  <p>{selectedIncidente.area?.nombre || 'No especificada'}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">Prioridad:</p>
-                  <p>
-                    {(() => {
-                      switch (selectedIncidente.prioridad) {
-                        case 0: return 'Baja';
-                        case 1: return 'Media';
-                        case 2: return 'Alta';
-                        default: return 'Desconocida';
-                      }
-                    })()}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">Fecha de Reporte:</p>
-                  <p>{formatDate(selectedIncidente.fecha_reporte)}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">Técnico:</p>
-                  <p>{formatTecnico(selectedIncidente.tecnico)}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">Comentarios Técnico:</p>
-                  <p>{selectedIncidente.comentarios_tecnico || 'Sin comentarios'}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">Estado:</p>
-                  <p>
-                    {(() => {
-                      switch (selectedIncidente.estado) {
-                        case 0: return 'Pendiente';
-                        case 1: return 'En progreso';
-                        case 2: return 'Resuelto';
-                        default: return 'Desconocido';
-                      }
-                    })()}
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-end mt-6">
-                <button
-                  onClick={closeDetailsModal}
-                  className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-400"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          </div>
+          <IncidenteDetailsModal
+            incidente={selectedIncidente}
+            setDetailsModalOpen={setDetailsModalOpen}
+          />
         )}
       </div>
     </div>
