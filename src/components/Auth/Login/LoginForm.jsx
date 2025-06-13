@@ -12,7 +12,7 @@ const LoginForm = ({ email, setEmail, password, setPassword, handleLogin, handle
           
           {/* Imagen en lugar del logo y texto */}
           <div className="bg-white rounded-full p-8 mb-8 shadow-lg">
-            <img src={img} alt="MelyMarckStore Logo" className="h-24 w-auto mx-auto" />
+            <img src={img} alt="Logo Muni" className="h-24 w-auto mx-auto" />
           </div>
           
           <h2 className="text-2xl font-semibold mb-4">Sistema de Gestión de Incidentes</h2>
@@ -28,7 +28,7 @@ const LoginForm = ({ email, setEmail, password, setPassword, handleLogin, handle
         <div className="max-w-sm mx-auto w-full">
           {/* Header móvil */}
           <div className="md:hidden text-center mb-8">
-            <img src="./img/logo.png" alt="MelyMarckStore Logo" className="h-12 w-auto mx-auto mb-4" />
+            <img src={img} alt="Logo Muni" className="h-12 w-auto mx-auto mb-4" />
           </div>
 
           <div className="text-center mb-8">
