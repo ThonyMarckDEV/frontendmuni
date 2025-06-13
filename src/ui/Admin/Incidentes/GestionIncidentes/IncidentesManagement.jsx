@@ -3,9 +3,10 @@ import { fetchWithAuth } from '../../../../js/authToken';
 import API_BASE_URL from '../../../../js/urlHelper';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import IncidenteTable from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteTable'; // Adjust path as needed
-import IncidenteDetailsModal from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteDetailsModal'; // Adjust path as needed
-import { X } from 'lucide-react'; // Added X import
+import { X } from 'lucide-react';
+import IncidenteTable from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteTable';
+import IncidenteDetailsModal from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteDetailsModal';
+import IncidenteFilter from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteFilter'; // New import
 
 const IncidentesManagement = () => {
   const [incidentes, setIncidentes] = useState([]);
@@ -23,31 +24,47 @@ const IncidentesManagement = () => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [filters, setFilters] = useState({
+    idIncidente: '',
+    estado: '0', // Default to Pendiente
+    fecha_inicio: '',
+    fecha_fin: '',
+  });
 
-  const fetchIncidentes = useCallback(async (page = 1) => {
-    setLoading(true);
-    try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes?page=${page}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const result = await response.json();
-      if (result.success && result.data) {
-        setIncidentes(result.data.data || []);
-        setCurrentPage(result.data.current_page);
-        setTotalPages(result.data.last_page);
-      } else {
+  const fetchIncidentes = useCallback(
+    async (page = 1, appliedFilters = filters) => {
+      setLoading(true);
+      try {
+        // Build query parameters
+        const queryParams = new URLSearchParams({ page: page.toString() });
+        if (appliedFilters.idIncidente) queryParams.append('idIncidente', appliedFilters.idIncidente);
+        if (appliedFilters.estado !== 'all') queryParams.append('estado', appliedFilters.estado);
+        if (appliedFilters.fecha_inicio) queryParams.append('fecha_inicio', appliedFilters.fecha_inicio);
+        if (appliedFilters.fecha_fin) queryParams.append('fecha_fin', appliedFilters.fecha_fin);
+
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes?${queryParams.toString()}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const result = await response.json();
+        if (result.success && result.data) {
+          setIncidentes(result.data.data || []);
+          setCurrentPage(result.data.current_page);
+          setTotalPages(result.data.last_page);
+        } else {
+          setIncidentes([]);
+          toast.error('Error al cargar incidentes');
+        }
+      } catch (error) {
+        console.error('Error fetching incidentes:', error.message);
         setIncidentes([]);
         toast.error('Error al cargar incidentes');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching incidentes:', error.message);
-      setIncidentes([]);
-      toast.error('Error al cargar incidentes');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [filters]
+  );
 
   const fetchTechnicians = useCallback(async () => {
     try {
@@ -70,15 +87,13 @@ const IncidentesManagement = () => {
   }, []);
 
   useEffect(() => {
-    fetchIncidentes(currentPage);
+    fetchIncidentes(currentPage, filters);
     fetchTechnicians();
   }, [currentPage, fetchIncidentes, fetchTechnicians]);
 
   const handleSelectIncidente = (idIncidente) => {
     setSelectedIncidentes((prev) =>
-      prev.includes(idIncidente)
-        ? prev.filter((id) => id !== idIncidente)
-        : [...prev, idIncidente]
+      prev.includes(idIncidente) ? prev.filter((id) => id !== idIncidente) : [...prev, idIncidente]
     );
   };
 
@@ -137,9 +152,7 @@ const IncidentesManagement = () => {
       const result = await response.json();
       if (result.success) {
         setIncidentes((prev) =>
-          prev.map((inc) =>
-            inc.idIncidente === selectedIncidente.idIncidente ? result.data : inc
-          )
+          prev.map((inc) => (inc.idIncidente === selectedIncidente.idIncidente ? result.data : inc))
         );
         closeEditModal();
         toast.success('Incidente actualizado exitosamente');
@@ -157,6 +170,18 @@ const IncidentesManagement = () => {
     }
   };
 
+  const handleApplyFilters = (newFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when applying filters
+    fetchIncidentes(1, newFilters);
+  };
+
+  const handleClearFilters = (defaultFilters) => {
+    setFilters(defaultFilters);
+    setCurrentPage(1); // Reset to first page when clearing filters
+    fetchIncidentes(1, defaultFilters);
+  };
+
   return (
     <div className="min-h-screen py-8 px-4 bg-gray-50">
       <div className="max-w-7xl mx-auto">
@@ -166,6 +191,9 @@ const IncidentesManagement = () => {
           </svg>
           Gestión de Incidentes
         </h1>
+
+        {/* IncidenteFilter Component */}
+        <IncidenteFilter onApplyFilters={handleApplyFilters} onClearFilters={handleClearFilters} />
 
         {/* IncidenteTable Component */}
         <IncidenteTable
@@ -188,9 +216,7 @@ const IncidentesManagement = () => {
             >
               Anterior
             </button>
-            <span className="text-gray-700 font-medium">
-              Página {currentPage} de {totalPages}
-            </span>
+            <span className="text-gray-700 font-medium">Página {currentPage} de {totalPages}</span>
             <button
               onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
@@ -209,10 +235,7 @@ const IncidentesManagement = () => {
                 <h2 className="text-xl font-bold text-gray-800">
                   Editar Incidente #{selectedIncidente?.idIncidente}
                 </h2>
-                <button
-                  onClick={closeEditModal}
-                  className="text-gray-600 hover:text-gray-800"
-                >
+                <button onClick={closeEditModal} className="text-gray-600 hover:text-gray-800">
                   <X className="w-6 h-6" />
                 </button>
               </div>
@@ -280,10 +303,7 @@ const IncidentesManagement = () => {
 
         {/* Details Modal */}
         {detailsModalOpen && selectedIncidente && (
-          <IncidenteDetailsModal
-            incidente={selectedIncidente}
-            setDetailsModalOpen={setDetailsModalOpen}
-          />
+          <IncidenteDetailsModal incidente={selectedIncidente} setDetailsModalOpen={setDetailsModalOpen} />
         )}
       </div>
     </div>

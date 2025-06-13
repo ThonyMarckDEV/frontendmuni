@@ -5,7 +5,8 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { X } from 'lucide-react';
 import IncidenteTable from '../../../../components/ui/Tecnico/GestionIncidentesComponents/IncidenteTable';
-import IncidenteDetailsModal from '../../../../components/ui/Tecnico/GestionIncidentesComponents/IncidenteDetailsModal'; // Adjust the import path as needed
+import IncidenteDetailsModal from '../../../../components/ui/Tecnico/GestionIncidentesComponents/IncidenteDetailsModal';
+import IncidenteFilter from '../../../../components/ui/Tecnico/GestionIncidentesComponents/IncidenteFilter'; // New import
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -24,41 +25,55 @@ const IncidentesManagement = () => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [filters, setFilters] = useState({
+    idIncidente: '',
+    estado: '0', // Default to Pendiente
+    fecha_inicio: '',
+    fecha_fin: '',
+  });
 
-  const fetchIncidentes = useCallback(async (page = 1) => {
-    setLoading(true);
-    try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes?page=${page}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const result = await response.json();
-      if (result.success && result.data) {
-        setIncidentes(result.data.data || []);
-        setCurrentPage(result.data.current_page);
-        setTotalPages(result.data.last_page);
-      } else {
+  const fetchIncidentes = useCallback(
+    async (page = 1, appliedFilters = filters) => {
+      setLoading(true);
+      try {
+        // Build query parameters
+        const queryParams = new URLSearchParams({ page: page.toString() });
+        if (appliedFilters.idIncidente) queryParams.append('idIncidente', appliedFilters.idIncidente);
+        if (appliedFilters.estado !== 'all') queryParams.append('estado', appliedFilters.estado);
+        if (appliedFilters.fecha_inicio) queryParams.append('fecha_inicio', appliedFilters.fecha_inicio);
+        if (appliedFilters.fecha_fin) queryParams.append('fecha_fin', appliedFilters.fecha_fin);
+
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes?${queryParams.toString()}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const result = await response.json();
+        if (result.success && result.data) {
+          setIncidentes(result.data.data || []);
+          setCurrentPage(result.data.current_page);
+          setTotalPages(result.data.last_page);
+        } else {
+          setIncidentes([]);
+          toast.error('Error al cargar incidentes');
+        }
+      } catch (error) {
+        console.error('Error fetching incidentes:', error.message);
         setIncidentes([]);
         toast.error('Error al cargar incidentes');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching incidentes:', error.message);
-      setIncidentes([]);
-      toast.error('Error al cargar incidentes');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [filters]
+  );
 
   useEffect(() => {
-    fetchIncidentes(currentPage);
+    fetchIncidentes(currentPage, filters);
   }, [currentPage, fetchIncidentes]);
 
   const handleSelectIncidente = (idIncidente) => {
     setSelectedIncidentes((prev) =>
-      prev.includes(idIncidente)
-        ? prev.filter((id) => id !== idIncidente)
-        : [...prev, idIncidente]
+      prev.includes(idIncidente) ? prev.filter((id) => id !== idIncidente) : [...prev, idIncidente]
     );
   };
 
@@ -125,6 +140,18 @@ const IncidentesManagement = () => {
     }
   };
 
+  const handleApplyFilters = (newFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when applying filters
+    fetchIncidentes(1, newFilters);
+  };
+
+  const handleClearFilters = (defaultFilters) => {
+    setFilters(defaultFilters);
+    setCurrentPage(1); // Reset to first page when clearing filters
+    fetchIncidentes(1, defaultFilters);
+  };
+
   const formatDate = (date) => {
     try {
       return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: es });
@@ -160,6 +187,9 @@ const IncidentesManagement = () => {
           </svg>
           Gestión de Incidentes
         </h1>
+
+        {/* IncidenteFilter Component */}
+        <IncidenteFilter onApplyFilters={handleApplyFilters} onClearFilters={handleClearFilters} />
 
         {/* IncidenteTable Component */}
         <IncidenteTable

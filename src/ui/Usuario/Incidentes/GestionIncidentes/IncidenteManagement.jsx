@@ -4,6 +4,7 @@ import API_BASE_URL from '../../../../js/urlHelper';
 import IncidenteTable from '../../../../components/ui/Usuario/GestionIncidentesComponents/IncidenteTable';
 import EditIncidenteModal from '../../../../components/ui/Usuario/GestionIncidentesComponents/EditIncidenteModal';
 import IncidenteDetailsModal from '../../../../components/ui/Usuario/GestionIncidentesComponents/IncidenteDetailsModal';
+import IncidenteFilter from '../../../../components/ui/Usuario/GestionIncidentesComponents/IncidenteFilter'; // New import
 import { toast } from 'react-toastify';
 
 const IncidenteManagement = () => {
@@ -15,6 +16,14 @@ const IncidenteManagement = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [currentIncidente, setCurrentIncidente] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1); // Added for pagination
+  const [totalPages, setTotalPages] = useState(1); // Added for pagination
+  const [filters, setFilters] = useState({
+    idIncidente: '',
+    estado: '0', // Default to Pendiente
+    fecha_inicio: '',
+    fecha_fin: '',
+  });
   const [formData, setFormData] = useState({
     idActivo: '',
     descripcion: '',
@@ -23,54 +32,63 @@ const IncidenteManagement = () => {
   });
   const [errors, setErrors] = useState({});
 
+  const fetchIncidentes = async (page = 1, appliedFilters = filters) => {
+    setLoading(true);
+    try {
+      // Build query parameters
+      const queryParams = new URLSearchParams({ page: page.toString() });
+      if (appliedFilters.idIncidente) queryParams.append('idIncidente', appliedFilters.idIncidente);
+      if (appliedFilters.estado !== 'all') queryParams.append('estado', appliedFilters.estado);
+      if (appliedFilters.fecha_inicio) queryParams.append('fecha_inicio', appliedFilters.fecha_inicio);
+      if (appliedFilters.fecha_fin) queryParams.append('fecha_fin', appliedFilters.fecha_fin);
+
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes?${queryParams.toString()}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const result = await response.json();
+      if (result.success && result.data) {
+        setIncidentes(result.data.data || []);
+        setCurrentPage(result.data.current_page);
+        setTotalPages(result.data.last_page);
+      } else {
+        setIncidentes([]);
+        toast.error(result.message || 'Error al cargar incidentes');
+      }
+    } catch (error) {
+      console.error('Error fetching incidentes:', error.message);
+      toast.error('Error al cargar incidentes');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchActivos = async () => {
+    setLoadingActivos(true);
+    try {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes/getactivos`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const result = await response.json();
+      if (result.success) {
+        setActivos(result.data);
+      } else {
+        console.error('Error fetching activos:', result.message);
+        toast.error(result.message || 'Error al cargar activos');
+      }
+    } catch (error) {
+      console.error('Error fetching activos:', error.message);
+      toast.error('Error al cargar activos');
+    } finally {
+      setLoadingActivos(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchIncidentes = async () => {
-      setLoading(true);
-      try {
-        const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        const result = await response.json();
-        if (result.success) {
-          setIncidentes(result.data.data);
-        } else {
-          console.error('Error fetching incidentes:', result.message);
-          toast.error('Error fetching incidentes:', result.message);
-        }
-      } catch (error) {
-        console.error('Error fetching incidentes:', error);
-        toast.error('Error fetching incidentes:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchActivos = async () => {
-      setLoadingActivos(true);
-      try {
-        const response = await fetchWithAuth(`${API_BASE_URL}/api/incidentes/getactivos`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        const result = await response.json();
-        if (result.success) {
-          setActivos(result.data);
-        } else {
-          console.error('Error fetching activos:', result.message);
-          toast.error('Error fetching activos:', result.message);
-        }
-      } catch (error) {
-        console.error('Error fetching activos:', error);
-        toast.error('Error fetching activos:', error);
-      } finally {
-        setLoadingActivos(false);
-      }
-    };
-
-    fetchIncidentes();
+    fetchIncidentes(currentPage, filters);
     fetchActivos();
-  }, []);
+  }, [currentPage, filters]);
 
   const handleSelectIncidente = (incidenteId) => {
     const incidenteIdStr = String(incidenteId);
@@ -86,7 +104,7 @@ const IncidenteManagement = () => {
     setFormData({
       idActivo: incidente.activo?.idActivo || '',
       descripcion: incidente.descripcion || '',
-      fecha_reporte: incidente.fecha_reporte || '',
+      fecha_reporte: incidente.fecha_reporte?.split(' ')[0] || '', // Format to YYYY-MM-DD
       prioridad: String(incidente.prioridad) || '0',
     });
     setEditModalOpen(true);
@@ -100,11 +118,30 @@ const IncidenteManagement = () => {
   const closeEditModal = () => {
     setEditModalOpen(false);
     setSelectedIncidentes([]);
+    setFormData({
+      idActivo: '',
+      descripcion: '',
+      fecha_reporte: '',
+      prioridad: '0',
+    });
+    setErrors({});
   };
 
   const closeDetailsModal = () => {
     setDetailsModalOpen(false);
     setSelectedIncidentes([]);
+  };
+
+  const handleApplyFilters = (newFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when applying filters
+    fetchIncidentes(1, newFilters);
+  };
+
+  const handleClearFilters = (defaultFilters) => {
+    setFilters(defaultFilters);
+    setCurrentPage(1); // Reset to first page when clearing filters
+    fetchIncidentes(1, defaultFilters);
   };
 
   return (
@@ -116,6 +153,11 @@ const IncidenteManagement = () => {
           </svg>
           Gestión de Incidentes
         </h1>
+
+        {/* IncidenteFilter Component */}
+        <IncidenteFilter onApplyFilters={handleApplyFilters} onClearFilters={handleClearFilters} />
+
+        {/* IncidenteTable Component */}
         <IncidenteTable
           incidentes={incidentes}
           loading={loading}
@@ -124,6 +166,31 @@ const IncidenteManagement = () => {
           openEditModal={openEditModal}
           openDetailsModal={openDetailsModal}
         />
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-8 flex justify-between items-center">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 transition-colors"
+            >
+              Anterior
+            </button>
+            <span className="text-gray-700 font-medium">
+              Página {currentPage} de {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 transition-colors"
+            >
+              Siguiente
+            </button>
+          </div>
+        )}
+
+        {/* Edit Modal */}
         {editModalOpen && (
           <EditIncidenteModal
             formData={formData}
@@ -181,6 +248,8 @@ const IncidenteManagement = () => {
             loadingActivos={loadingActivos}
           />
         )}
+
+        {/* Details Modal */}
         {detailsModalOpen && currentIncidente && (
           <IncidenteDetailsModal
             incidente={currentIncidente}
