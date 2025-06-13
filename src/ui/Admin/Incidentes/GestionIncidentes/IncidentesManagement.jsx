@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { fetchWithAuth } from '../../../../js/authToken';
 import API_BASE_URL from '../../../../js/urlHelper';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Pencil, X } from 'lucide-react';
+import IncidenteTable from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteTable'; // Adjust path as needed
+import IncidenteDetailsModal from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteDetailsModal'; // Adjust path as needed
+import { X } from 'lucide-react'; // Added X import
 
 const IncidentesManagement = () => {
   const [incidentes, setIncidentes] = useState([]);
@@ -12,7 +14,9 @@ const IncidentesManagement = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedIncidente, setSelectedIncidente] = useState(null);
+  const [selectedIncidentes, setSelectedIncidentes] = useState([]);
   const [formData, setFormData] = useState({
     idTecnico: '',
     estado: 0,
@@ -28,7 +32,6 @@ const IncidentesManagement = () => {
         headers: { 'Content-Type': 'application/json' },
       });
       const result = await response.json();
-      console.log('Incidentes API response:', result);
       if (result.success && result.data) {
         setIncidentes(result.data.data || []);
         setCurrentPage(result.data.current_page);
@@ -40,7 +43,7 @@ const IncidentesManagement = () => {
     } catch (error) {
       console.error('Error fetching incidentes:', error.message);
       setIncidentes([]);
-       toast.error('Error al cargar incidentes');
+      toast.error('Error al cargar incidentes');
     } finally {
       setLoading(false);
     }
@@ -53,8 +56,7 @@ const IncidentesManagement = () => {
         headers: { 'Content-Type': 'application/json' },
       });
       const result = await response.json();
-      console.log('Technicians API response:', result);
-      if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+      if (result.success && Array.isArray(result.data)) {
         setTechnicians(result.data);
       } else {
         setTechnicians([]);
@@ -72,13 +74,26 @@ const IncidentesManagement = () => {
     fetchTechnicians();
   }, [currentPage, fetchIncidentes, fetchTechnicians]);
 
-  const handleEdit = (incidente) => {
+  const handleSelectIncidente = (idIncidente) => {
+    setSelectedIncidentes((prev) =>
+      prev.includes(idIncidente)
+        ? prev.filter((id) => id !== idIncidente)
+        : [...prev, idIncidente]
+    );
+  };
+
+  const openEditModal = (incidente) => {
     setSelectedIncidente(incidente);
     setFormData({
       idTecnico: incidente.tecnico?.idUsuario || '',
       estado: incidente.estado || 0,
     });
     setEditModalOpen(true);
+  };
+
+  const openDetailsModal = (incidente) => {
+    setSelectedIncidente(incidente);
+    setDetailsModalOpen(true);
   };
 
   const closeEditModal = () => {
@@ -142,117 +157,44 @@ const IncidentesManagement = () => {
     }
   };
 
-  const priorityLabel = (prioridad) => {
-    switch (prioridad) {
-      case 0:
-        return 'Baja';
-      case 1:
-        return 'Media';
-      case 2:
-        return 'Alta';
-      default:
-        return 'Desconocida';
-    }
-  };
-
-  const stateLabel = (estado) => {
-    switch (estado) {
-      case 0:
-        return 'Pendiente';
-      case 1:
-        return 'En progreso';
-      case 2:
-        return 'Resuelto';
-      default:
-        return 'Desconocido';
-    }
-  };
-
   return (
     <div className="min-h-screen py-8 px-4 bg-gray-50">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           Gestión de Incidentes
         </h1>
 
-        {/* Incidentes Table */}
-        <div className="bg-white rounded-lg shadow overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Activo</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Área</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Técnico</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prioridad</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Título</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
-                <tr>
-                  <td colSpan="8" className="px-6 py-4 text-center text-gray-600">Cargando incidentes...</td>
-                </tr>
-              ) : incidentes.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="px-6 py-4 text-center text-gray-600">No hay incidentes registrados</td>
-                </tr>
-              ) : (
-                incidentes.map((incidente) => (
-                  <tr key={incidente.idIncidente} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">{incidente.idIncidente}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {incidente.activo ? `${incidente.activo.codigo_inventario} (${incidente.activo.tipo})` : '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{incidente.area?.nombre || '-'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {incidente.tecnico ? `${incidente.tecnico.nombre} ${incidente.tecnico.apellido}` : '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{priorityLabel(incidente.prioridad)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{incidente.titulo}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{stateLabel(incidente.estado)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => handleEdit(incidente)}
-                        className="text-blue-600 hover:text-blue-800"
-                        title="Editar"
-                        disabled={technicians.length === 0}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        {/* IncidenteTable Component */}
+        <IncidenteTable
+          incidentes={incidentes}
+          loading={loading}
+          selectedIncidentes={selectedIncidentes}
+          handleSelectIncidente={handleSelectIncidente}
+          openEditModal={openEditModal}
+          openDetailsModal={openDetailsModal}
+          technicians={technicians}
+        />
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-4 flex justify-between items-center">
+          <div className="mt-8 flex justify-between items-center">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 disabled:opacity-50"
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 transition-colors"
             >
               Anterior
             </button>
-            <span className="text-gray-600">Página {currentPage} de {totalPages}</span>
+            <span className="text-gray-700 font-medium">
+              Página {currentPage} de {totalPages}
+            </span>
             <button
               onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 disabled:opacity-50"
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 transition-colors"
             >
               Siguiente
             </button>
@@ -262,9 +204,9 @@ const IncidentesManagement = () => {
         {/* Edit Modal */}
         {editModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-2xl max-w-xl w-full p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-800">
+            <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-800">
                   Editar Incidente #{selectedIncidente?.idIncidente}
                 </h2>
                 <button
@@ -314,19 +256,19 @@ const IncidentesManagement = () => {
                   </select>
                   {errors.estado && <p className="text-red-500 text-xs mt-1">{errors.estado}</p>}
                 </div>
-                {errors.general && <p className="text-red-500 text-xs mb-4">{errors.general}</p>}
+                {errors.general && <p className="text-red-500 text-sm mb-4">{errors.general}</p>}
                 <div className="flex justify-end gap-4">
                   <button
                     type="button"
                     onClick={closeEditModal}
-                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                    className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-400"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting || technicians.length === 0}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                    className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 disabled:bg-blue-300"
                   >
                     Guardar
                   </button>
@@ -334,6 +276,14 @@ const IncidentesManagement = () => {
               </form>
             </div>
           </div>
+        )}
+
+        {/* Details Modal */}
+        {detailsModalOpen && selectedIncidente && (
+          <IncidenteDetailsModal
+            incidente={selectedIncidente}
+            setDetailsModalOpen={setDetailsModalOpen}
+          />
         )}
       </div>
     </div>

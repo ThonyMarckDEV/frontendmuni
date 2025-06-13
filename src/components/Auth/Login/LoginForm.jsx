@@ -86,10 +86,6 @@ const LoginForm = ({ email, setEmail, password, setPassword, handleLogin, handle
                   Recordarme (7 días)
                 </label>
               </div>
-              
-              <button className="text-sm text-blue-600 hover:text-blue-500 font-medium">
-                ¿Olvidaste tu contraseña?
-              </button>
             </div>
 
             <button
