@@ -44,6 +44,10 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
     return comentarios ? comentarios : 'Sin comentarios';
   };
 
+  const formatNombreTecnico = (nombre) => {
+    if (!nombre) return 'Sin técnico asignado';   
+  };
+
   const estadoText = getEstadoText(incidente.estado);
   const prioridadText = getPrioridadText(incidente.prioridad);
 
@@ -151,7 +155,7 @@ const IncidenteDetailsModal = ({ incidente, setDetailsModalOpen }) => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Técnico Asignado:</span>
-                  {incidente.tecnico?.nombre + ' ' + incidente.tecnico?.apellido || 'No asignado'}
+                  {formatNombreTecnico(incidente.tecnico?.nombre + ' ' + incidente.tecnico?.apellido)}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Comentarios Técnico:</span>
