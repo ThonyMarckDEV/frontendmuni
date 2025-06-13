@@ -254,7 +254,7 @@ const IncidentesManagement = () => {
                     <option value="">Seleccione un técnico</option>
                     {technicians.map((tecnico) => (
                       <option key={tecnico.idUsuario} value={tecnico.idUsuario}>
-                        {tecnico.nombre} {tecnico.apellido}
+                        {tecnico.nombre} {tecnico.apellido} (Especialidad: {tecnico.especializacion})
                       </option>
                     ))}
                   </select>
