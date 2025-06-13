@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { X } from 'lucide-react';
 import IncidenteTable from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteTable';
 import IncidenteDetailsModal from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteDetailsModal';
-import IncidenteFilter from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteFilter';
+import IncidenteFilter from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteFilter'; // New import
 
 const IncidentesManagement = () => {
   const [incidentes, setIncidentes] = useState([]);
@@ -20,13 +20,13 @@ const IncidentesManagement = () => {
   const [selectedIncidentes, setSelectedIncidentes] = useState([]);
   const [formData, setFormData] = useState({
     idTecnico: '',
-    estado: 1, // Default to En Progreso
+    estado: 0,
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [filters, setFilters] = useState({
     idIncidente: '',
-    estado: '1', // Default to En Progreso
+    estado: '0', // Default to Pendiente
     fecha_inicio: '',
     fecha_fin: '',
   });
@@ -38,7 +38,7 @@ const IncidentesManagement = () => {
         // Build query parameters
         const queryParams = new URLSearchParams({ page: page.toString() });
         if (appliedFilters.idIncidente) queryParams.append('idIncidente', appliedFilters.idIncidente);
-        queryParams.append('estado', '1'); // Always filter by En Progreso
+        if (appliedFilters.estado !== 'all') queryParams.append('estado', appliedFilters.estado);
         if (appliedFilters.fecha_inicio) queryParams.append('fecha_inicio', appliedFilters.fecha_inicio);
         if (appliedFilters.fecha_fin) queryParams.append('fecha_fin', appliedFilters.fecha_fin);
 
@@ -101,7 +101,7 @@ const IncidentesManagement = () => {
     setSelectedIncidente(incidente);
     setFormData({
       idTecnico: incidente.tecnico?.idUsuario || '',
-      estado: 1, // Always En Progreso
+      estado: incidente.estado || 0,
     });
     setEditModalOpen(true);
   };
@@ -114,7 +114,7 @@ const IncidentesManagement = () => {
   const closeEditModal = () => {
     setEditModalOpen(false);
     setSelectedIncidente(null);
-    setFormData({ idTecnico: '', estado: 1 });
+    setFormData({ idTecnico: '', estado: 0 });
     setErrors({});
   };
 
@@ -126,7 +126,7 @@ const IncidentesManagement = () => {
     const validateForm = () => {
       const newErrors = {};
       if (!formData.idTecnico) newErrors.idTecnico = 'Debe seleccionar un técnico';
-      if (formData.estado !== 1) newErrors.estado = 'Estado inválido';
+      if (![0, 1, 2].includes(Number(formData.estado))) newErrors.estado = 'Estado inválido';
       setErrors(newErrors);
       return Object.keys(newErrors).length === 0;
     };
@@ -144,7 +144,7 @@ const IncidentesManagement = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             idTecnico: formData.idTecnico || null,
-            estado: 1, // Always En Progreso
+            estado: Number(formData.estado),
             idActivo: selectedIncidente.activo?.idActivo,
           }),
         }
@@ -171,16 +171,15 @@ const IncidentesManagement = () => {
   };
 
   const handleApplyFilters = (newFilters) => {
-    setFilters({ ...newFilters, estado: '1' }); // Force estado to En Progreso
+    setFilters(newFilters);
     setCurrentPage(1); // Reset to first page when applying filters
-    fetchIncidentes(1, { ...newFilters, estado: '1' });
+    fetchIncidentes(1, newFilters);
   };
 
   const handleClearFilters = (defaultFilters) => {
-    const resetFilters = { ...defaultFilters, estado: '1' }; // Force estado to En Progreso
-    setFilters(resetFilters);
+    setFilters(defaultFilters);
     setCurrentPage(1); // Reset to first page when clearing filters
-    fetchIncidentes(1, resetFilters);
+    fetchIncidentes(1, defaultFilters);
   };
 
   return (
@@ -273,7 +272,6 @@ const IncidentesManagement = () => {
                     value={formData.estado}
                     onChange={(e) => setFormData({ ...formData, estado: Number(e.target.value) })}
                     className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    disabled
                   >
                     <option value={1}>En progreso</option>
                   </select>
