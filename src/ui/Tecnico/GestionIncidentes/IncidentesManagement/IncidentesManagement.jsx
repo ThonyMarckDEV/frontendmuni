@@ -27,7 +27,7 @@ const IncidentesManagement = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [filters, setFilters] = useState({
     idIncidente: '',
-    estado: '0', // Default to Pendiente
+    estado: '1',
     fecha_inicio: '',
     fecha_fin: '',
   });
