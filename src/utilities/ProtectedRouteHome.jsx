@@ -17,6 +17,9 @@ const ProtectedRoute = ({ element }) => {
       case 'usuario':
         return <Navigate to="/usuario" />;
         return element;
+      case 'tecnico':
+        return <Navigate to="/tecnico" />;
+        return element;
     }
   }
 
