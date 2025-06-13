@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { X } from 'lucide-react';
 import IncidenteTable from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteTable';
 import IncidenteDetailsModal from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteDetailsModal';
-import IncidenteFilter from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteFilter'; // New import
+import IncidenteFilter from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteFilter';
 
 const IncidentesManagement = () => {
   const [incidentes, setIncidentes] = useState([]);
@@ -20,13 +20,13 @@ const IncidentesManagement = () => {
   const [selectedIncidentes, setSelectedIncidentes] = useState([]);
   const [formData, setFormData] = useState({
     idTecnico: '',
-    estado: 0,
+    estado: 1, // Default to "En progreso"
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [filters, setFilters] = useState({
     idIncidente: '',
-    estado: '0', // Default to Pendiente
+    estado: '0',
     fecha_inicio: '',
     fecha_fin: '',
   });
@@ -35,7 +35,6 @@ const IncidentesManagement = () => {
     async (page = 1, appliedFilters = filters) => {
       setLoading(true);
       try {
-        // Build query parameters
         const queryParams = new URLSearchParams({ page: page.toString() });
         if (appliedFilters.idIncidente) queryParams.append('idIncidente', appliedFilters.idIncidente);
         if (appliedFilters.estado !== 'all') queryParams.append('estado', appliedFilters.estado);
@@ -101,7 +100,7 @@ const IncidentesManagement = () => {
     setSelectedIncidente(incidente);
     setFormData({
       idTecnico: incidente.tecnico?.idUsuario || '',
-      estado: incidente.estado || 0,
+      estado: 1, // Set to "En progreso"
     });
     setEditModalOpen(true);
   };
@@ -114,7 +113,7 @@ const IncidentesManagement = () => {
   const closeEditModal = () => {
     setEditModalOpen(false);
     setSelectedIncidente(null);
-    setFormData({ idTecnico: '', estado: 0 });
+    setFormData({ idTecnico: '', estado: 1 });
     setErrors({});
   };
 
@@ -126,7 +125,7 @@ const IncidentesManagement = () => {
     const validateForm = () => {
       const newErrors = {};
       if (!formData.idTecnico) newErrors.idTecnico = 'Debe seleccionar un técnico';
-      if (![0, 1, 2].includes(Number(formData.estado))) newErrors.estado = 'Estado inválido';
+      if (formData.estado !== 1) newErrors.estado = 'Estado inválido';
       setErrors(newErrors);
       return Object.keys(newErrors).length === 0;
     };
@@ -172,13 +171,13 @@ const IncidentesManagement = () => {
 
   const handleApplyFilters = (newFilters) => {
     setFilters(newFilters);
-    setCurrentPage(1); // Reset to first page when applying filters
+    setCurrentPage(1);
     fetchIncidentes(1, newFilters);
   };
 
   const handleClearFilters = (defaultFilters) => {
     setFilters(defaultFilters);
-    setCurrentPage(1); // Reset to first page when clearing filters
+    setCurrentPage(1);
     fetchIncidentes(1, defaultFilters);
   };
 
@@ -192,10 +191,8 @@ const IncidentesManagement = () => {
           Gestión de Incidentes
         </h1>
 
-        {/* IncidenteFilter Component */}
         <IncidenteFilter onApplyFilters={handleApplyFilters} onClearFilters={handleClearFilters} />
 
-        {/* IncidenteTable Component */}
         <IncidenteTable
           incidentes={incidentes}
           loading={loading}
@@ -206,7 +203,6 @@ const IncidentesManagement = () => {
           technicians={technicians}
         />
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="mt-8 flex justify-between items-center">
             <button
@@ -227,7 +223,6 @@ const IncidentesManagement = () => {
           </div>
         )}
 
-        {/* Edit Modal */}
         {editModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
@@ -272,10 +267,9 @@ const IncidentesManagement = () => {
                     value={formData.estado}
                     onChange={(e) => setFormData({ ...formData, estado: Number(e.target.value) })}
                     className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    disabled
                   >
-                    <option value={0}>Pendiente</option>
                     <option value={1}>En progreso</option>
-                    <option value={2}>Resuelto</option>
                   </select>
                   {errors.estado && <p className="text-red-500 text-xs mt-1">{errors.estado}</p>}
                 </div>
@@ -301,7 +295,6 @@ const IncidentesManagement = () => {
           </div>
         )}
 
-        {/* Details Modal */}
         {detailsModalOpen && selectedIncidente && (
           <IncidenteDetailsModal incidente={selectedIncidente} setDetailsModalOpen={setDetailsModalOpen} />
         )}
