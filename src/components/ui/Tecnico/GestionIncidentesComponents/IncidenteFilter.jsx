@@ -4,7 +4,7 @@ import { Calendar, X, Search } from 'lucide-react';
 const IncidenteFilter = ({ onApplyFilters, onClearFilters }) => {
   const [filters, setFilters] = useState({
     idIncidente: '',
-    estado: '0', // Default to Pendiente
+    estado: '1', // Default to En Progreso
     fecha_inicio: '',
     fecha_fin: '',
   });
@@ -37,7 +37,7 @@ const IncidenteFilter = ({ onApplyFilters, onClearFilters }) => {
   const handleClearFilters = () => {
     const defaultFilters = {
       idIncidente: '',
-      estado: '0',
+      estado: '1', // Reset to En Progreso
       fecha_inicio: '',
       fecha_fin: '',
     };
@@ -83,7 +83,6 @@ const IncidenteFilter = ({ onApplyFilters, onClearFilters }) => {
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           >
             <option value="all">Todos</option>
-            <option value="0">Pendiente</option>
             <option value="1">En Progreso</option>
             <option value="2">Resuelto</option>
           </select>
