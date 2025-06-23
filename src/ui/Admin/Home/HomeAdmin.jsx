@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
+import DashboardCard from '../../../components/ui/Admin/DashboardComponents/DashboardCard';
 import ActivosComponent from '../../../components/ui/Admin/DashboardComponents/ActivosComponent';
 import UsersComponent from '../../../components/ui/Admin/DashboardComponents/UsersComponent';
-import DashboardCard from '../../../components/ui/Admin/DashboardComponents/DashboardCard';
+import AreasComponent from '../../../components/ui/Admin/DashboardComponents/AreasComponent';
+import IncidentesComponent from '../../../components/ui/Admin/DashboardComponents/IncidentesComponent';
 
 const dashboards = [
   { id: 1, title: 'Activos Totales', description: 'Resumen de todos los activos', color: 'bg-blue-500', component: ActivosComponent },
-  { id: 2, title: 'Usuarios', description: 'Resumen de usuarios por área', color: 'bg-green-500', component: UsersComponent },
-  { id: 3, title: 'Inventario', description: 'Gestión de inventario actual', color: 'bg-purple-500', component: null },
-  { id: 4, title: 'Mantenimiento', description: 'Programación de mantenimiento', color: 'bg-orange-500', component: null },
+  { id: 2, title: 'Usuarios', description: 'Resumen de usuarios', color: 'bg-green-500', component: UsersComponent },
+  { id: 3, title: 'Areas', description: 'Resumen de areas', color: 'bg-purple-500', component: AreasComponent },
+  { id: 4, title: 'Incidentes', description: 'Resumen de incidentes', color: 'bg-orange-500', component: IncidentesComponent },
 ];
 
 const HomeAdmin = () => {
