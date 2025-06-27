@@ -75,6 +75,7 @@ const Sidebar = () => {
         ];
       case 'tecnico':
         return [
+          { icon: Home, label: 'Dashboard', path: '/tecnico' },
           { icon: AlertTriangle, label: 'Incidentes', path: '/tecnico/gestion-incidentes' },
         ];
       case 'usuario':
