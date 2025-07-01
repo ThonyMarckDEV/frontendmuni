@@ -1,17 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Home, 
-  FileText, 
   Users, 
   AlertTriangle, 
-  Bell, 
-  Settings, 
   LogOut, 
   X, 
   Menu,
   ChevronDown,
   ChevronRight,
-  Wrench,
   Monitor,
   MapPin,
   Layers
