@@ -6,6 +6,7 @@ import UserTable from '../../../../components/ui/Admin/GestionUsuariosComponents
 import ActionBar from '../../../../components/ui/Admin/GestionUsuariosComponents/ActionBar';
 import EditUserModal from '../../../../components/ui/Admin/GestionUsuariosComponents/EditUserModal';
 import UserDetailsModal from '../../../../components/ui/Admin/GestionUsuariosComponents/UserDetailsModal';
+import Pagination from '../../../../components/Reutilizables/Pagination';
 import { toast } from 'react-toastify';
 
 const UserManagement = () => {
@@ -21,6 +22,13 @@ const UserManagement = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [paginationData, setPaginationData] = useState({
+    current_page: 1,
+    last_page: 1,
+    links: [],
+    per_page: 8,
+    total: 0,
+  });
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -35,6 +43,35 @@ const UserManagement = () => {
   });
   const [errors, setErrors] = useState({});
 
+  const fetchUsers = async (url = `${API_BASE_URL}/api/users`) => {
+    setLoading(true);
+    try {
+      const response = await fetchWithAuth(url, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const result = await response.json();
+      if (result.success) {
+        setUsers(result.data.data);
+        setPaginationData({
+          current_page: result.data.current_page,
+          last_page: result.data.last_page,
+          links: result.data.links,
+          per_page: result.data.per_page,
+          total: result.data.total,
+        });
+      } else {
+        console.error('Error fetching users:', result.message);
+        toast.error('Error fetching users: ' + result.message);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Error fetching users: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchRoles = async () => {
       setLoadingRoles(true);
@@ -48,11 +85,11 @@ const UserManagement = () => {
           setRoles(result.data);
         } else {
           console.error('Error fetching roles:', result.message);
-          toast.error('Error fetching roles:', result.message);
+          toast.error('Error fetching roles: ' + result.message);
         }
       } catch (error) {
         console.error('Error fetching roles:', error);
-        toast.error('Error fetching roles:', error);
+        toast.error('Error fetching roles: ' + error.message);
       } finally {
         setLoadingRoles(false);
       }
@@ -70,35 +107,13 @@ const UserManagement = () => {
           setAreas(result.data);
         } else {
           console.error('Error fetching areas:', result.message);
-          toast.error('Error fetching areas:', result.message);
+          toast.error('Error fetching areas: ' + result.message);
         }
       } catch (error) {
         console.error('Error fetching areas:', error);
-        toast.error('Error fetching areas:', error);
+        toast.error('Error fetching areas: ' + error.message);
       } finally {
         setLoadingAreas(false);
-      }
-    };
-
-    const fetchUsers = async () => {
-      setLoading(true);
-      try {
-        const response = await fetchWithAuth(`${API_BASE_URL}/api/users`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        const result = await response.json();
-        if (result.success) {
-          setUsers(result.data.data);
-        } else {
-          console.error('Error fetching users:', result.message);
-          toast.error('Error fetching users:', result.message);
-        }
-      } catch (error) {
-        console.error('Error fetching users:', error);
-         toast.error('Error fetching users:', error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -114,6 +129,12 @@ const UserManagement = () => {
       const isSelected = prevStr.includes(userIdStr);
       return isSelected ? [] : [userId];
     });
+  };
+
+  const handlePageChange = (pageUrl) => {
+    if (pageUrl) {
+      fetchUsers(pageUrl);
+    }
   };
 
   const filteredUsers = users.filter((user) => {
@@ -190,6 +211,10 @@ const UserManagement = () => {
           loading={loading}
           selectedUsers={selectedUsers}
           handleSelectUser={handleSelectUser}
+        />
+        <Pagination
+          paginationData={paginationData}
+          onPageChange={handlePageChange}
         />
         {selectedUsers.length === 1 && (
           <ActionBar
