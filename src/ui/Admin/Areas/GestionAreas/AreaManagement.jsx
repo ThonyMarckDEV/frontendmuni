@@ -6,6 +6,7 @@ import AreaTable from '../../../../components/ui/Admin/GestionAreasComponents/Ar
 import ActionBar from '../../../../components/ui/Admin/GestionAreasComponents/ActionBar';
 import EditAreaModal from '../../../../components/ui/Admin/GestionAreasComponents/EditAreaModal';
 import AreaDetailsModal from '../../../../components/ui/Admin/GestionAreasComponents/AreaDetailsModal';
+import Pagination from '../../../../components/Reutilizables/Pagination';
 import { toast } from 'react-toastify';
 
 const AreaManagement = () => {
@@ -16,43 +17,99 @@ const AreaManagement = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [currentArea, setCurrentArea] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(8);
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    last_page: 1,
+    per_page: 8,
+    total: 0,
+    from: 0,
+    to: 0,
+    has_more_pages: false,
+  });
   const [formData, setFormData] = useState({
     nombre: '',
   });
   const [errors, setErrors] = useState({});
 
+  const buildUrlParams = () => {
+    const params = new URLSearchParams({
+      page: currentPage.toString(),
+      per_page: perPage.toString(),
+    });
+    if (searchTerm.trim()) {
+      params.append('search', searchTerm.trim());
+    }
+    return params.toString();
+  };
+
   useEffect(() => {
     const fetchAreas = async () => {
       setLoading(true);
       try {
-        const response = await fetchWithAuth(`${API_BASE_URL}/api/areas`, {
+        const urlParams = buildUrlParams();
+        console.log('Fetching areas with URL:', `${API_BASE_URL}/api/areas?${urlParams}`);
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/areas?${urlParams}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
         const result = await response.json();
-        if (result.success) {
-          setAreas(result.data);
+        console.log('Areas API response:', result);
+
+        if (result.success && result.data && Array.isArray(result.data.data)) {
+          setAreas(result.data.data);
+          setPagination(result.data.pagination || {
+            current_page: 1,
+            last_page: 1,
+            per_page: perPage,
+            total: result.data.data.length,
+            from: 1,
+            to: result.data.data.length,
+            has_more_pages: false,
+          });
+          console.log('Updated pagination state:', result.data.pagination);
         } else {
-          console.error('Error fetching areas:', result.message);
-          toast.error('Error fetching areas:', result.message);
+          console.error('Error fetching areas:', result.message || 'Invalid data format');
+          setAreas([]);
+          setPagination({
+            current_page: 1,
+            last_page: 1,
+            per_page: perPage,
+            total: 0,
+            from: 0,
+            to: 0,
+            has_more_pages: false,
+          });
+          toast.error('Error al cargar áreas: ' + (result.message || 'Formato de datos inválido'));
         }
       } catch (error) {
-        console.error('Error fetching areas:', error);
-        toast.error('Error fetching areas:', error);
+        console.error('Error fetching areas:', error.message);
+        setAreas([]);
+        setPagination({
+          current_page: 1,
+          last_page: 1,
+          per_page: perPage,
+          total: 0,
+          from: 0,
+          to: 0,
+          has_more_pages: false,
+        });
+        toast.error('Error al cargar áreas: ' + error.message);
       } finally {
         setLoading(false);
       }
     };
 
     fetchAreas();
-  }, []);
+  }, [currentPage, perPage, searchTerm]);
 
   const handleSelectArea = (areaId) => {
     const areaIdStr = String(areaId);
     setSelectedAreas((prev) => {
       const prevStr = prev.map((id) => String(id));
       const isSelected = prevStr.includes(areaIdStr);
-      return isSelected ? [] : [areaId]; // Toggle selection: select if not selected, deselect if already selected
+      return isSelected ? [] : [areaId];
     });
   };
 
@@ -63,6 +120,19 @@ const AreaManagement = () => {
     }
     return (area.nombre || '').toLowerCase().includes(searchTerm.toLowerCase());
   });
+
+  const handlePageChange = (page) => {
+    console.log('Changing to page:', page);
+    setCurrentPage(page);
+    setSelectedAreas([]);
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    console.log('Changing per page to:', newPerPage);
+    setPerPage(newPerPage);
+    setCurrentPage(1);
+    setSelectedAreas([]);
+  };
 
   const openEditModal = (area) => {
     setCurrentArea(area);
@@ -79,12 +149,12 @@ const AreaManagement = () => {
 
   const closeEditModal = () => {
     setEditModalOpen(false);
-    setSelectedAreas([]); // Clear selection when closing
+    setSelectedAreas([]);
   };
 
   const closeDetailsModal = () => {
     setDetailsModalOpen(false);
-    setSelectedAreas([]); // Clear selection when closing
+    setSelectedAreas([]);
   };
 
   return (
@@ -102,12 +172,28 @@ const AreaManagement = () => {
           Gestión de Áreas
         </h1>
         <AreaSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        <AreaTable
-          areas={filteredAreas}
-          loading={loading}
-          selectedAreas={filteredAreas}
-          handleSelectArea={handleSelectArea}
-        />
+        <div className="bg-white rounded-lg shadow">
+          <AreaTable
+            areas={filteredAreas}
+            loading={loading}
+            selectedAreas={selectedAreas} // Fixed: Pass selectedAreas, not filteredAreas
+            handleSelectArea={handleSelectArea}
+          />
+          <Pagination
+            currentPage={pagination.current_page}
+            lastPage={pagination.last_page}
+            total={pagination.total}
+            perPage={pagination.per_page}
+            from={pagination.from}
+            to={pagination.to}
+            hasMorePages={pagination.has_more_pages}
+            onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
+            loading={loading}
+            showPerPageSelector={true}
+            perPageOptions={[5, 8, 10, 15, 20, 25]}
+          />
+        </div>
         {selectedAreas.length === 1 && (
           <ActionBar
             area={areas.find((area) => area.idArea === selectedAreas[0])}
@@ -144,11 +230,24 @@ const AreaManagement = () => {
                 const result = await response.json();
                 if (result.success) {
                   toast.success('Área actualizada exitosamente');
-                  setAreas((prev) =>
-                    prev.map((area) =>
-                      area.idArea === currentArea.idArea ? { ...area, ...result.data } : area
-                    )
-                  );
+                  const urlParams = buildUrlParams();
+                  const response = await fetchWithAuth(`${API_BASE_URL}/api/areas?${urlParams}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                  });
+                  const result = await response.json();
+                  if (result.success && result.data && Array.isArray(result.data.data)) {
+                    setAreas(result.data.data);
+                    setPagination(result.data.pagination || {
+                      current_page: 1,
+                      last_page: 1,
+                      per_page: perPage,
+                      total: result.data.data.length,
+                      from: 1,
+                      to: result.data.data.length,
+                      has_more_pages: false,
+                    });
+                  }
                   closeEditModal();
                 } else {
                   setErrors(result.errors || { general: result.message });

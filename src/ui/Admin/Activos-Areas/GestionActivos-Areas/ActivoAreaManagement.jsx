@@ -65,7 +65,7 @@ const ActivoAreaManagement = () => {
     const fetchAreas = async () => {
       setLoadingAreas(true);
       try {
-        const response = await fetchWithAuth(`${API_BASE_URL}/api/areas`, {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/areaslistar`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -92,7 +92,7 @@ const ActivoAreaManagement = () => {
     const fetchActivos = async () => {
       setLoadingActivos(true);
       try {
-        const response = await fetchWithAuth(`${API_BASE_URL}/api/activos`, {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/activoslistar`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
