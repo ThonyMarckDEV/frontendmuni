@@ -23,7 +23,6 @@ const UserManagement = () => {
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   
-  // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(8);
   const [pagination, setPagination] = useState({
@@ -33,7 +32,7 @@ const UserManagement = () => {
     total: 0,
     from: 0,
     to: 0,
-    has_more_pages: false
+    has_more_pages: false,
   });
 
   const [formData, setFormData] = useState({
@@ -50,7 +49,6 @@ const UserManagement = () => {
   });
   const [errors, setErrors] = useState({});
 
-  // Función para construir parámetros de URL
   const buildUrlParams = () => {
     const params = new URLSearchParams({
       page: currentPage.toString(),
@@ -77,15 +75,17 @@ const UserManagement = () => {
           headers: { 'Content-Type': 'application/json' },
         });
         const result = await response.json();
-        if (result.success) {
+        if (result.success && Array.isArray(result.data)) {
           setRoles(result.data);
         } else {
-          console.error('Error fetching roles:', result.message);
-          toast.error('Error fetching roles: ' + result.message);
+          console.error('Error fetching roles: Invalid response', result.message);
+          toast.error('Error fetching roles: Invalid response');
+          setRoles([]);
         }
       } catch (error) {
         console.error('Error fetching roles:', error);
         toast.error('Error fetching roles: ' + error.message);
+        setRoles([]);
       } finally {
         setLoadingRoles(false);
       }
@@ -94,20 +94,22 @@ const UserManagement = () => {
     const fetchAreas = async () => {
       setLoadingAreas(true);
       try {
-        const response = await fetchWithAuth(`${API_BASE_URL}/api/areas`, {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/areaslistar`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
         const result = await response.json();
-        if (result.success) {
+        if (result.success && Array.isArray(result.data)) {
           setAreas(result.data);
         } else {
-          console.error('Error fetching areas:', result.message);
-          toast.error('Error fetching areas: ' + result.message);
+          console.error('Error fetching areas: Invalid response', result.message);
+          toast.error('Error fetching areas: Invalid response');
+          setAreas([]);
         }
       } catch (error) {
         console.error('Error fetching areas:', error);
         toast.error('Error fetching areas: ' + error.message);
+        setAreas([]);
       } finally {
         setLoadingAreas(false);
       }
@@ -117,7 +119,6 @@ const UserManagement = () => {
     fetchAreas();
   }, []);
 
-  // Función para obtener usuarios con paginación
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -143,12 +144,10 @@ const UserManagement = () => {
     }
   };
 
-  // Efecto para cargar usuarios cuando cambian los filtros o paginación
   useEffect(() => {
     fetchUsers();
   }, [currentPage, perPage, searchTerm, selectedRole]);
 
-  // Resetear a la primera página cuando cambian los filtros
   useEffect(() => {
     if (currentPage !== 1) {
       setCurrentPage(1);
@@ -164,16 +163,15 @@ const UserManagement = () => {
     });
   };
 
-  // Manejadores de paginación
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    setSelectedUsers([]); // Limpiar selección al cambiar página
+    setSelectedUsers([]);
   };
 
   const handlePerPageChange = (newPerPage) => {
     setPerPage(newPerPage);
-    setCurrentPage(1); // Volver a la primera página
-    setSelectedUsers([]); // Limpiar selección
+    setCurrentPage(1);
+    setSelectedUsers([]);
   };
 
   const openEditModal = (user) => {
@@ -314,7 +312,6 @@ const UserManagement = () => {
                 const result = await response.json();
                 if (result.success) {
                   toast.success('Usuario actualizado exitosamente');
-                  // Recargar usuarios para reflejar los cambios
                   fetchUsers();
                   closeEditModal();
                 } else {
