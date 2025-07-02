@@ -22,13 +22,20 @@ const UserManagement = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [paginationData, setPaginationData] = useState({
+  
+  // Estados para paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(8);
+  const [pagination, setPagination] = useState({
     current_page: 1,
     last_page: 1,
-    links: [],
     per_page: 8,
     total: 0,
+    from: 0,
+    to: 0,
+    has_more_pages: false
   });
+
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -43,33 +50,22 @@ const UserManagement = () => {
   });
   const [errors, setErrors] = useState({});
 
-  const fetchUsers = async (url = `${API_BASE_URL}/api/users`) => {
-    setLoading(true);
-    try {
-      const response = await fetchWithAuth(url, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const result = await response.json();
-      if (result.success) {
-        setUsers(result.data.data);
-        setPaginationData({
-          current_page: result.data.current_page,
-          last_page: result.data.last_page,
-          links: result.data.links,
-          per_page: result.data.per_page,
-          total: result.data.total,
-        });
-      } else {
-        console.error('Error fetching users:', result.message);
-        toast.error('Error fetching users: ' + result.message);
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      toast.error('Error fetching users: ' + error.message);
-    } finally {
-      setLoading(false);
+  // Función para construir parámetros de URL
+  const buildUrlParams = () => {
+    const params = new URLSearchParams({
+      page: currentPage.toString(),
+      per_page: perPage.toString(),
+    });
+
+    if (searchTerm.trim()) {
+      params.append('search', searchTerm.trim());
     }
+
+    if (selectedRole) {
+      params.append('rol', selectedRole);
+    }
+
+    return params.toString();
   };
 
   useEffect(() => {
@@ -119,8 +115,45 @@ const UserManagement = () => {
 
     fetchRoles();
     fetchAreas();
-    fetchUsers();
   }, []);
+
+  // Función para obtener usuarios con paginación
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const urlParams = buildUrlParams();
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/users?${urlParams}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const result = await response.json();
+      
+      if (result.success) {
+        setUsers(result.data.data);
+        setPagination(result.pagination);
+      } else {
+        console.error('Error fetching users:', result.message);
+        toast.error('Error fetching users: ' + result.message);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Error fetching users: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Efecto para cargar usuarios cuando cambian los filtros o paginación
+  useEffect(() => {
+    fetchUsers();
+  }, [currentPage, perPage, searchTerm, selectedRole]);
+
+  // Resetear a la primera página cuando cambian los filtros
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [searchTerm, selectedRole]);
 
   const handleSelectUser = (userId) => {
     const userIdStr = String(userId);
@@ -131,25 +164,17 @@ const UserManagement = () => {
     });
   };
 
-  const handlePageChange = (pageUrl) => {
-    if (pageUrl) {
-      fetchUsers(pageUrl);
-    }
+  // Manejadores de paginación
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    setSelectedUsers([]); // Limpiar selección al cambiar página
   };
 
-  const filteredUsers = users.filter((user) => {
-    if (!user.idUsuario) {
-      console.warn('User with undefined idUsuario found:', user);
-      return false;
-    }
-    const matchesSearch =
-      (user.datos?.nombre || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.datos?.apellido || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.datos?.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.datos?.dni || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = selectedRole ? user.idRol === parseInt(selectedRole) : true;
-    return matchesSearch && matchesRole;
-  });
+  const handlePerPageChange = (newPerPage) => {
+    setPerPage(newPerPage);
+    setCurrentPage(1); // Volver a la primera página
+    setSelectedUsers([]); // Limpiar selección
+  };
 
   const openEditModal = (user) => {
     setCurrentUser(user);
@@ -197,6 +222,7 @@ const UserManagement = () => {
           </svg>
           Gestión de Usuarios
         </h1>
+        
         <UserSearch
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -205,17 +231,32 @@ const UserManagement = () => {
           roles={roles}
           loadingRoles={loadingRoles}
         />
-        <UserTable
-          users={filteredUsers}
-          roles={roles}
-          loading={loading}
-          selectedUsers={selectedUsers}
-          handleSelectUser={handleSelectUser}
-        />
-        <Pagination
-          paginationData={paginationData}
-          onPageChange={handlePageChange}
-        />
+        
+        <div className="bg-white rounded-lg shadow">
+          <UserTable
+            users={users}
+            roles={roles}
+            loading={loading}
+            selectedUsers={selectedUsers}
+            handleSelectUser={handleSelectUser}
+          />
+          
+          <Pagination
+            currentPage={pagination.current_page}
+            lastPage={pagination.last_page}
+            total={pagination.total}
+            perPage={pagination.per_page}
+            from={pagination.from}
+            to={pagination.to}
+            hasMorePages={pagination.has_more_pages}
+            onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
+            loading={loading}
+            showPerPageSelector={true}
+            perPageOptions={[5, 8, 10, 15, 20, 25]}
+          />
+        </div>
+
         {selectedUsers.length === 1 && (
           <ActionBar
             user={users.find((user) => user.idUsuario === selectedUsers[0])}
@@ -223,6 +264,7 @@ const UserManagement = () => {
             openDetailsModal={openDetailsModal}
           />
         )}
+        
         {editModalOpen && (
           <EditUserModal
             formData={formData}
@@ -272,13 +314,8 @@ const UserManagement = () => {
                 const result = await response.json();
                 if (result.success) {
                   toast.success('Usuario actualizado exitosamente');
-                  setUsers((prev) =>
-                    prev.map((user) =>
-                      user.idUsuario === currentUser.idUsuario
-                        ? { ...user, ...result.data, datos: { ...user.datos, ...result.data.datos } }
-                        : user
-                    )
-                  );
+                  // Recargar usuarios para reflejar los cambios
+                  fetchUsers();
                   closeEditModal();
                 } else {
                   setErrors(result.errors || { general: result.message });
@@ -294,6 +331,7 @@ const UserManagement = () => {
             setEditModalOpen={closeEditModal}
           />
         )}
+        
         {detailsModalOpen && currentUser && (
           <UserDetailsModal
             user={currentUser}

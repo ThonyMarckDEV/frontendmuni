@@ -5,6 +5,7 @@ import ActivoTable from '../../../../components/ui/Admin/GestionActivosComponent
 import ActionBar from '../../../../components/ui/Admin/GestionActivosComponents/ActionBar';
 import EditActivoModal from '../../../../components/ui/Admin/GestionActivosComponents/EditActivoModal';
 import ActivoDetailsModal from '../../../../components/ui/Admin/GestionActivosComponents/ActivoDetailsModal';
+import Pagination from '../../../../components/Reutilizables/Pagination';
 import { toast } from 'react-toastify';
 
 const ActivoManagement = () => {
@@ -14,6 +15,19 @@ const ActivoManagement = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [currentActivo, setCurrentActivo] = useState(null);
+  // Estados para paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(8);
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    last_page: 1,
+    per_page: 8,
+    total: 0,
+    from: 0,
+    to: 0,
+    has_more_pages: false,
+  });
+  // Estado para el formulario de edición
   const [formData, setFormData] = useState({
     codigo_inventario: '',
     ubicacion: '',
@@ -23,39 +37,77 @@ const ActivoManagement = () => {
   });
   const [errors, setErrors] = useState({});
 
+  // Función para construir parámetros de URL
+  const buildUrlParams = () => {
+    const params = new URLSearchParams({
+      page: currentPage.toString(),
+      per_page: perPage.toString(),
+    });
+    return params.toString();
+  };
+
   useEffect(() => {
     const fetchActivos = async () => {
       setLoading(true);
       try {
-        const response = await fetchWithAuth(`${API_BASE_URL}/api/activos`, {
+        const urlParams = buildUrlParams();
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/activos?${urlParams}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
         const result = await response.json();
         console.log('Activos API response:', result); // Debug log
-        if (result.success && Array.isArray(result.data)) {
+
+        if (result.success && result.data && Array.isArray(result.data.data)) {
           // Normalize idActivo to id
-          const normalizedActivos = result.data.map((activo) => ({
+          const normalizedActivos = result.data.data.map((activo) => ({
             ...activo,
             id: activo.idActivo,
           }));
           setActivos(normalizedActivos);
+          setPagination(result.data.pagination || {
+            current_page: 1,
+            last_page: 1,
+            per_page: perPage,
+            total: normalizedActivos.length,
+            from: 1,
+            to: normalizedActivos.length,
+            has_more_pages: false,
+          });
         } else {
-          setActivos([]);
           console.error('Error fetching activos:', result.message || 'Invalid data format');
-          toast.error('Error al cargar activos');
+          setActivos([]);
+          setPagination({
+            current_page: 1,
+            last_page: 1,
+            per_page: perPage,
+            total: 0,
+            from: 0,
+            to: 0,
+            has_more_pages: false,
+          });
+          toast.error('Error al cargar activos: ' + (result.message || 'Formato de datos inválido'));
         }
       } catch (error) {
         console.error('Error fetching activos:', error.message);
         setActivos([]);
-        toast.error('Error al cargar activos');
+        setPagination({
+          current_page: 1,
+          last_page: 1,
+          per_page: perPage,
+          total: 0,
+          from: 0,
+          to: 0,
+          has_more_pages: false,
+        });
+        toast.error('Error al cargar activos: ' + error.message);
       } finally {
         setLoading(false);
       }
     };
 
     fetchActivos();
-  }, []);
+  }, [currentPage, perPage]);
 
   const handleSelectActivo = (activoId) => {
     const activoIdStr = String(activoId);
@@ -64,6 +116,17 @@ const ActivoManagement = () => {
       const isSelected = prevStr.includes(activoIdStr);
       return isSelected ? [] : [activoId];
     });
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    setSelectedActivos([]); // Limpiar selección al cambiar página
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    setPerPage(newPerPage);
+    setCurrentPage(1); // Volver a la primera página
+    setSelectedActivos([]); // Limpiar selección
   };
 
   const openEditModal = (activo) => {
@@ -98,16 +161,38 @@ const ActivoManagement = () => {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke="default" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6h12m0 0l-4-4m4 4l-4 4m-18-2h12m0 0l-4-4m4 4l-4 4" />
+            <path
+              stroke="default"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6h12m0 0l-4-4m4 4l-4 4m-18-2h12m0 0l-4-4m4 4l-4 4"
+            />
           </svg>
           Gestión de Activos
         </h1>
-        <ActivoTable
-          activos={activos}
-          loading={loading}
-          selectedActivos={selectedActivos}
-          handleSelectActivo={handleSelectActivo}
-        />
+        <div className="bg-white rounded-lg shadow">
+          <ActivoTable
+            activos={activos}
+            loading={loading}
+            selectedActivos={selectedActivos}
+            handleSelectActivo={handleSelectActivo}
+          />
+          <Pagination
+            currentPage={pagination.current_page}
+            lastPage={pagination.last_page}
+            total={pagination.total}
+            perPage={pagination.per_page}
+            from={pagination.from}
+            to={pagination.to}
+            hasMorePages={pagination.has_more_pages}
+            onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
+            loading={loading}
+            showPerPageSelector={true}
+            perPageOptions={[5, 8, 10, 15, 20, 25]}
+          />
+        </div>
         {selectedActivos.length === 1 && (
           <ActionBar
             activo={activos.find((activo) => activo.id === selectedActivos[0] || activo.idActivo === selectedActivos[0])}
@@ -147,11 +232,29 @@ const ActivoManagement = () => {
                 const result = await response.json();
                 if (result.success) {
                   toast.success('Activo actualizado exitosamente');
-                  setActivos((prev) =>
-                    prev.map((activo) =>
-                      (activo.id || activo.idActivo) === (currentActivo.id || currentActivo.idActivo) ? { ...activo, ...result.data, id: result.data.idActivo } : activo
-                    )
-                  );
+                  // Recargar activos para reflejar los cambios
+                  const urlParams = buildUrlParams();
+                  const response = await fetchWithAuth(`${API_BASE_URL}/api/activos?${urlParams}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                  });
+                  const result = await response.json();
+                  if (result.success && result.data && Array.isArray(result.data.data)) {
+                    const normalizedActivos = result.data.data.map((activo) => ({
+                      ...activo,
+                      id: activo.idActivo,
+                    }));
+                    setActivos(normalizedActivos);
+                    setPagination(result.data.pagination || {
+                      current_page: 1,
+                      last_page: 1,
+                      per_page: perPage,
+                      total: normalizedActivos.length,
+                      from: 1,
+                      to: normalizedActivos.length,
+                      has_more_pages: false,
+                    });
+                  }
                   closeEditModal();
                 } else {
                   setErrors(result.errors || { general: result.message });
