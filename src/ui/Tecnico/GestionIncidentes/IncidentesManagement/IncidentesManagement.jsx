@@ -9,6 +9,7 @@ import IncidenteDetailsModal from '../../../../components/ui/Tecnico/GestionInci
 import IncidenteFilter from '../../../../components/ui/Tecnico/GestionIncidentesComponents/IncidenteFilter'; // New import
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import {PaginationComponent} from '../../../../components/ui/Admin/GestionIncidentesComponents/PaginationComponent';
 
 const IncidentesManagement = () => {
   const [incidentes, setIncidentes] = useState([]);
@@ -201,28 +202,11 @@ const IncidentesManagement = () => {
           openDetailsModal={openDetailsModal}
         />
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="mt-8 flex justify-between items-center">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 transition-colors"
-            >
-              Anterior
-            </button>
-            <span className="text-gray-700 font-medium">
-              Página {currentPage} de {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 transition-colors"
-            >
-              Siguiente
-            </button>
-          </div>
-        )}
+        <PaginationComponent 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          setCurrentPage={setCurrentPage}
+        />
 
         {/* Edit Modal */}
         {editModalOpen && (
