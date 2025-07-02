@@ -4,6 +4,7 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
+  LogarithmicScale,
   BarElement,
   Title,
   Tooltip,
@@ -18,6 +19,7 @@ import Pagination from '../../../Reutilizables/Pagination';
 ChartJS.register(
   CategoryScale,
   LinearScale,
+  LogarithmicScale,
   BarElement,
   Title,
   Tooltip,
@@ -82,8 +84,8 @@ const UsersComponent = ({ dashboard, onClose }) => {
       const data = await response.json();
       console.log('Full API Response:', data);
 
-      if (!data) {
-        throw new Error('Invalid or empty response from server');
+      if (!data || !Array.isArray(data.usersByArea)) {
+        throw new Error('Invalid or empty usersByArea response from server');
       }
 
       const { totalUsers = 0, usersByArea = [], usersDetails } = data;
@@ -140,7 +142,6 @@ const UsersComponent = ({ dashboard, onClose }) => {
     const { name, value } = e.target;
     setFilters((prev) => {
       const newFilters = { ...prev, [name]: value };
-      // Reset to page 1 when filters change
       if (name !== 'name') {
         fetchDashboardData(1, pagination.perPage, newFilters);
       } else {
@@ -150,30 +151,77 @@ const UsersComponent = ({ dashboard, onClose }) => {
     });
   };
 
+  // Debug chart data
+  useEffect(() => {
+    const labels = dashboardData.usersByArea.map((item) => item.area || 'Sin Área');
+    const data = dashboardData.usersByArea.map((item) => item.count || 0);
+    console.log('Chart Data for Bar:', { labels, data });
+    console.log('Chart Data for Doughnut:', { labels, data });
+    console.log('Number of Areas:', labels.length);
+    console.log('Chart Colors:', chartColors.backgroundColor.slice(0, labels.length));
+  }, [dashboardData.usersByArea]);
+
+  // Dynamic color array for charts
+  const chartColors = {
+    backgroundColor: [
+      'rgba(54, 162, 235, 0.8)',
+      'rgba(255, 99, 132, 0.8)',
+      'rgba(255, 206, 86, 0.8)',
+      'rgba(75, 192, 192, 0.8)',
+      'rgba(153, 102, 255, 0.8)',
+      'rgba(255, 159, 64, 0.8)',
+      'rgba(199, 199, 199, 0.8)',
+      'rgba(83, 102, 255, 0.8)',
+      'rgba(255, 99, 71, 0.8)',
+      'rgba(102, 255, 102, 0.8)',
+    ],
+    borderColor: [
+      'rgba(54, 162, 235, 1)',
+      'rgba(255, 99, 132, 1)',
+      'rgba(255, 206, 86, 1)',
+      'rgba(75, 192, 192, 1)',
+      'rgba(153, 102, 255, 1)',
+      'rgba(255, 159, 64, 1)',
+      'rgba(199, 199, 199, 1)',
+      'rgba(83, 102, 255, 1)',
+      'rgba(255, 99, 71, 1)',
+      'rgba(102, 255, 102, 1)',
+    ],
+    hoverBackgroundColor: [
+      'rgba(54, 162, 235, 1)',
+      'rgba(255, 99, 132, 1)',
+      'rgba(255, 206, 86, 1)',
+      'rgba(75, 192, 192, 1)',
+      'rgba(153, 102, 255, 1)',
+      'rgba(255, 159, 64, 1)',
+      'rgba(199, 199, 199, 1)',
+      'rgba(83, 102, 255, 1)',
+      'rgba(255, 99, 71, 1)',
+      'rgba(102, 255, 102, 1)',
+    ],
+  };
+
   // Bar Chart Configuration
   const barChartData = {
-    labels: dashboardData.usersByArea.map((item) => item.area || ''), // Display null as empty string
+    labels: dashboardData.usersByArea.length
+      ? dashboardData.usersByArea.map((item) => item.area || 'Sin Área')
+      : ['No Data'],
     datasets: [
       {
         label: 'Número de Usuarios',
-        data: dashboardData.usersByArea.map((item) => item.count),
-        backgroundColor: [
-          'rgba(54, 162, 235, 0.8)',
-          'rgba(255, 99, 132, 0.8)',
-          'rgba(255, 206, 86, 0.8)',
-          'rgba(75, 192, 192, 0.8)',
-          'rgba(153, 102, 255, 0.8)',
-        ],
-        borderColor: [
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 99, 132, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-        ],
+        data: dashboardData.usersByArea.length
+          ? dashboardData.usersByArea.map((item) => item.count || 0)
+          : [0],
+        backgroundColor: dashboardData.usersByArea.length
+          ? chartColors.backgroundColor.slice(0, dashboardData.usersByArea.length)
+          : ['rgba(200, 200, 200, 0.8)'],
+        borderColor: dashboardData.usersByArea.length
+          ? chartColors.borderColor.slice(0, dashboardData.usersByArea.length)
+          : ['rgba(200, 200, 200, 1)'],
         borderWidth: 2,
         borderRadius: 8,
         borderSkipped: false,
+        minBarLength: 5, // Ensure small bars are visible
       },
     ],
   };
@@ -208,9 +256,16 @@ const UsersComponent = ({ dashboard, onClose }) => {
     },
     scales: {
       y: {
+        type: 'logarithmic', // Use logarithmic scale for large value differences
         beginAtZero: true,
-        ticks: { stepSize: 1, font: { size: 12 } },
+        ticks: {
+          font: { size: 12 },
+          callback: function (value) {
+            return Number.isInteger(Math.log10(value)) ? value : null;
+          },
+        },
         grid: { color: 'rgba(0, 0, 0, 0.1)' },
+        min: 1, // Start at 1 to avoid log(0) issues
       },
       x: {
         ticks: { font: { size: 12, weight: 'bold' } },
@@ -221,32 +276,24 @@ const UsersComponent = ({ dashboard, onClose }) => {
 
   // Doughnut Chart Configuration
   const doughnutChartData = {
-    labels: dashboardData.usersByArea.map((item) => item.area || ''), // Display null as empty string
+    labels: dashboardData.usersByArea.length
+      ? dashboardData.usersByArea.map((item) => item.area || 'Sin Área')
+      : ['No Data'],
     datasets: [
       {
-        data: dashboardData.usersByArea.map((item) => item.count),
-        backgroundColor: [
-          'rgba(54, 162, 235, 0.8)',
-          'rgba(255, 99, 132, 0.8)',
-          'rgba(255, 206, 86, 0.8)',
-          'rgba(75, 192, 192, 0.8)',
-          'rgba(153, 102, 255, 0.8)',
-        ],
-        borderColor: [
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 99, 132, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-        ],
+        data: dashboardData.usersByArea.length
+          ? dashboardData.usersByArea.map((item) => item.count || 0)
+          : [0],
+        backgroundColor: dashboardData.usersByArea.length
+          ? chartColors.backgroundColor.slice(0, dashboardData.usersByArea.length)
+          : ['rgba(200, 200, 200, 0.8)'],
+        borderColor: dashboardData.usersByArea.length
+          ? chartColors.borderColor.slice(0, dashboardData.usersByArea.length)
+          : ['rgba(200, 200, 200, 1)'],
         borderWidth: 2,
-        hoverBackgroundColor: [
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 99, 132, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-        ],
+        hoverBackgroundColor: dashboardData.usersByArea.length
+          ? chartColors.hoverBackgroundColor.slice(0, dashboardData.usersByArea.length)
+          : ['rgba(200, 200, 200, 1)'],
       },
     ],
   };
@@ -254,6 +301,8 @@ const UsersComponent = ({ dashboard, onClose }) => {
   const doughnutChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    cutout: '60%', // Increase cutout to make small segments more visible
+    rotation: -90, // Rotate to make small segments more distinct
     plugins: {
       legend: {
         position: 'right',
@@ -267,7 +316,7 @@ const UsersComponent = ({ dashboard, onClose }) => {
                 const value = dataset.data[i];
                 const percentage = ((value / dashboardData.totalUsers) * 100).toFixed(1);
                 return {
-                  text: `${label || 'Sin Área'}: ${value} (${percentage}%)`, // Display null as 'Sin Área' in legend
+                  text: `${label}: ${value} (${percentage}%)`,
                   fillStyle: dataset.backgroundColor[i],
                   strokeStyle: dataset.borderColor[i],
                   lineWidth: dataset.borderWidth,
@@ -291,7 +340,7 @@ const UsersComponent = ({ dashboard, onClose }) => {
         callbacks: {
           label: function (context) {
             const percentage = ((context.parsed / dashboardData.totalUsers) * 100).toFixed(1);
-            return `${context.label || 'Sin Área'}: ${context.parsed} clientes (${percentage}%)`;
+            return `${context.label}: ${context.parsed} clientes (${percentage}%)`;
           },
         },
       },
@@ -380,7 +429,6 @@ const UsersComponent = ({ dashboard, onClose }) => {
           </div>
         </div>
 
-
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Bar Chart */}
@@ -398,7 +446,7 @@ const UsersComponent = ({ dashboard, onClose }) => {
           </div>
         </div>
 
-         {/* Filter Form */}
+        {/* Filter Form */}
         <div className="mb-6 bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold text-gray-900 mb-4">Filtros</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -437,6 +485,23 @@ const UsersComponent = ({ dashboard, onClose }) => {
                 placeholder="Buscar por nombre o apellido"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
+            </div>
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                Rol
+              </label>
+              <select
+                id="role"
+                name="role"
+                value={filters.role}
+                onChange={handleFilterChange}
+                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+              >
+                <option value="all">Todos los roles</option>
+                <option value="admin">Admin</option>
+                <option value="usuario">Usuario</option>
+                <option value="tecnico">Técnico</option>
+              </select>
             </div>
           </div>
         </div>
