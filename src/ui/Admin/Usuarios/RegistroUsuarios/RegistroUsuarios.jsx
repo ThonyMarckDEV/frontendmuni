@@ -54,7 +54,7 @@ const RegistroUsuarios = ({ userId = null, onSuccess = () => {} }) => {
     const fetchAreas = async () => {
       setLoadingAreas(true);
       try {
-        const response = await fetchWithAuth(`${API_BASE_URL}/api/areas`, {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/areaslistar`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
