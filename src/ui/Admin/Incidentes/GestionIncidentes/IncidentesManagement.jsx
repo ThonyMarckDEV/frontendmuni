@@ -7,6 +7,7 @@ import { X } from 'lucide-react';
 import IncidenteTable from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteTable';
 import IncidenteDetailsModal from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteDetailsModal';
 import IncidenteFilter from '../../../../components/ui/Admin/GestionIncidentesComponents/IncidenteFilter';
+import {PaginationComponent} from '../../../../components/ui/Admin/GestionIncidentesComponents/PaginationComponent';
 
 const IncidentesManagement = () => {
   const [incidentes, setIncidentes] = useState([]);
@@ -48,7 +49,10 @@ const IncidentesManagement = () => {
         const result = await response.json();
         if (result.success && result.data) {
           setIncidentes(result.data.data || []);
-          setCurrentPage(result.data.current_page);
+          // Solo actualizar currentPage si es diferente al que se solicitó
+          if (result.data.current_page !== page) {
+            setCurrentPage(result.data.current_page);
+          }
           setTotalPages(result.data.last_page);
         } else {
           setIncidentes([]);
@@ -85,10 +89,15 @@ const IncidentesManagement = () => {
     }
   }, []);
 
+  // Separar useEffect para evitar dependencias circulares
+  useEffect(() => {
+    fetchTechnicians();
+  }, [fetchTechnicians]);
+
+  // useEffect separado para fetchIncidentes que solo se ejecuta cuando cambian los filtros o currentPage
   useEffect(() => {
     fetchIncidentes(currentPage, filters);
-    fetchTechnicians();
-  }, [currentPage, fetchIncidentes, fetchTechnicians]);
+  }, [currentPage, filters]); // Remover fetchIncidentes de las dependencias
 
   const handleSelectIncidente = (idIncidente) => {
     setSelectedIncidentes((prev) =>
@@ -172,13 +181,13 @@ const IncidentesManagement = () => {
   const handleApplyFilters = (newFilters) => {
     setFilters(newFilters);
     setCurrentPage(1);
-    fetchIncidentes(1, newFilters);
+    // fetchIncidentes se ejecutará automáticamente por el useEffect
   };
 
   const handleClearFilters = (defaultFilters) => {
     setFilters(defaultFilters);
     setCurrentPage(1);
-    fetchIncidentes(1, defaultFilters);
+    // fetchIncidentes se ejecutará automáticamente por el useEffect
   };
 
   return (
@@ -203,25 +212,11 @@ const IncidentesManagement = () => {
           technicians={technicians}
         />
 
-        {totalPages > 1 && (
-          <div className="mt-8 flex justify-between items-center">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 transition-colors"
-            >
-              Anterior
-            </button>
-            <span className="text-gray-700 font-medium">Página {currentPage} de {totalPages}</span>
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 transition-colors"
-            >
-              Siguiente
-            </button>
-          </div>
-        )}
+        <PaginationComponent 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          setCurrentPage={setCurrentPage}
+        />
 
         {editModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
